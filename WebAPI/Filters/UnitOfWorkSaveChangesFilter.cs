@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.Filters
+namespace WebAPI.Filters
 {
     public class UnitOfWorkSaveChangesFilter : IAsyncActionFilter
     {

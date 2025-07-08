@@ -1,8 +1,8 @@
 ﻿using ApplicationService.Repositories;
 using Domain.Entities;
-using Infrastructure.Contracts;
 using Infrastructure.Repositories.Common;
 using Microsoft.EntityFrameworkCore;
+using Persistence.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
-    public class RefreshTokenRepository : WriteRepositoryBase<RefreshToken>, IRefreshTokenRepository
+    public class RefreshTokenRepository : RepositoryBase<RefreshToken>, IRefreshTokenRepository
     {
-        private readonly WriteDbContext _dbContext;
-        public RefreshTokenRepository(WriteDbContext dbContext) : base(dbContext)
+        private readonly AppDbContext _dbContext;
+        public RefreshTokenRepository(AppDbContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
         }

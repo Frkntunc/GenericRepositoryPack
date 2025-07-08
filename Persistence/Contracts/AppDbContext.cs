@@ -6,13 +6,12 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
-using Users.Domain.Entities;
 
-namespace Infrastructure.Contracts
+namespace Persistence.Contracts
 {
-    public class WriteDbContext : DbContext
+    public class AppDbContext : DbContext
     {
-        public WriteDbContext(DbContextOptions<WriteDbContext> options) : base(options) { }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<RefreshToken> RefreshToken => Set<RefreshToken>();
         public DbSet<User> User => Set<User>();

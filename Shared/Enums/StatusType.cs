@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Enums
+namespace Shared.Enums
 {
     public enum StatusType : short
     {

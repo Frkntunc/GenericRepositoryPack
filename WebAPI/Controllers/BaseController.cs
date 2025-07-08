@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 namespace WebAPI.Controllers;
 
 [ApiController]
-[Route("api/v1/base")]
+[Route("api/[controller]")]
 public abstract class BaseController : ControllerBase
 {
 

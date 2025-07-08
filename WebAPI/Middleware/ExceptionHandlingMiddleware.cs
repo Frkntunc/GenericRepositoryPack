@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
 
-namespace WebApiGateway.Middleware;
+namespace WebAPI.Middleware;
 
 public class ExceptionHandlingMiddleware
 {

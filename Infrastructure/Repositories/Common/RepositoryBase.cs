@@ -1,6 +1,6 @@
 ﻿using ApplicationService.Repositories.Common;
 using Domain.Entities.Common;
-using Infrastructure.Contracts;
+using Persistence.Contracts;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.Common
 {
-    public class WriteRepositoryBase<T> : IWriteRepositoryBase<T> where T : EntityBase
+    public class RepositoryBase<T> : IRepositoryBase<T> where T : EntityBase
     {
-        private readonly WriteDbContext _dbContext;
+        private readonly AppDbContext _dbContext;
 
-        public WriteRepositoryBase(WriteDbContext dbContext)
+        public RepositoryBase(AppDbContext dbContext)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
@@ -30,6 +30,21 @@ namespace Infrastructure.Repositories.Common
         {
             await _dbContext.Set<T>().AddRangeAsync(entities);
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<IReadOnlyList<T>> GetAllAsync()
+        {
+            return await _dbContext.Set<T>().AsNoTracking().ToListAsync();
+        }
+
+        public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbContext.Set<T>().SingleOrDefaultAsync(predicate);
+        }
+
+        public async Task<T> GetByIdAsync(int id)
+        {
+            return await _dbContext.Set<T>().FindAsync(id);
         }
 
         public async Task RemoveAsync(T entity)
@@ -56,6 +71,5 @@ namespace Infrastructure.Repositories.Common
             _dbContext.Entry(entities).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
         }
-
     }
 }

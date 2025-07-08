@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using System.IO;
 
-namespace WebApiGateway.Middleware
+namespace WebAPI.Middleware
 {
     public class CsrfMiddleware
     {

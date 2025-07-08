@@ -1,4 +1,4 @@
-using Domain.Enums;
+using Shared.Enums;
 using ApplicationService.Services;
 using ApplicationService.SharedKernel;
 using ApplicationService.SharedKernel.Auth;

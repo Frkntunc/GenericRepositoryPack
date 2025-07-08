@@ -1,16 +1,16 @@
 ﻿using ApplicationService.Features.Queries.QueryRequests.User;
 using ApplicationService.Repositories;
-using Domain.Models;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Users.Application.DTO;
 
 namespace ApplicationService.Features.Queries.QueryHandlers.User
 {
-    public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<UserReadModel>>
+    public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<UserDto>>
     {
         private readonly IUserRepository userRepository;
 
@@ -19,11 +19,11 @@ namespace ApplicationService.Features.Queries.QueryHandlers.User
             this.userRepository = userRepository;
         }
 
-        public async Task<List<UserReadModel>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        public async Task<List<UserDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
             var users = await userRepository.GetAllAsync();
 
-            return new List<UserReadModel>();
+            return new List<UserDto>();
         }
     }
 }

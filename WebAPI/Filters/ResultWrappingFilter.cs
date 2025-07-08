@@ -7,13 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApplicationService.SharedKernel.Exceptions
+namespace WebAPI.Filters
 {
     public class ResultWrappingFilter : IActionFilter
     {
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            
+
         }
 
         public void OnActionExecuted(ActionExecutedContext context)

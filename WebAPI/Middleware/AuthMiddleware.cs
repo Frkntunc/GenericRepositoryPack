@@ -1,6 +1,6 @@
 ﻿using ApplicationService.SharedKernel.Auth;
 
-namespace WebApiGateway.Middleware
+namespace WebAPI.Middleware
 {
     public class AuthMiddleware
     {
