@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Users.API": {
+    "WebAPI": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

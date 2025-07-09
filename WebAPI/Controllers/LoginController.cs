@@ -6,12 +6,10 @@ using ApplicationService.SharedKernel.Auth.Common;
 using ApplicationService.SharedKernel.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 using WebAPI.Model.Auth;
 using WebAPI.Model.Login;
 using WebAPI.Helper;
 using ApplicationService.Repositories;
-using ApplicationService.Repositories.Common;
 
 namespace WebAPI.Controllers;
 
