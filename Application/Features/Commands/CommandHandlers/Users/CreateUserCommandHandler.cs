@@ -3,6 +3,7 @@ using ApplicationService.Repositories;
 using ApplicationService.Repositories.Common;
 using Domain.Entities;
 using MediatR;
+using Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,11 @@ namespace ApplicationService.Features.Commands.CommandHandlers.Users
             {
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                Email = request.Email
+                Email = request.Email,
+                Status = StatusType.Available,
+                PasswordHash = "sadfghj",
+                LoginTryCount = 0,
+                IsBlocked = false
             };
 
             await userRepository.AddAsync(user);

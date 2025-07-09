@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Serilog;
-using FluentValidation;
-using WebAPI.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Enums;
 using ApplicationService.SharedKernel.Auth;
@@ -10,6 +8,8 @@ using WebAPI.Filters;
 using Microsoft.OpenApi.Models;
 using ApplicationService.Extensions;
 using Infrastructure.Extensions;
+using Persistence.Contracts;
+using Microsoft.EntityFrameworkCore;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -20,7 +20,8 @@ Log.Logger = new LoggerConfiguration()
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureService(builder.Configuration);
+builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -60,7 +61,6 @@ builder.Services.Configure<CsrfOptions>(builder.Configuration.GetSection("CsrfOp
 builder.Services
     .AddControllers()
     .PartManager.ApplicationParts.Add(new AssemblyPart(typeof(WebAPI.Controllers.UserController).Assembly));
-builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -86,6 +86,13 @@ builder.Services.AddControllers(options =>
 });
 
 var app = builder.Build();
+
+// Veritabanı otomatik migrate
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate(); // Eğer migration varsa uygular
+}
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<JwtCookieMiddleware>();

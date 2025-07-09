@@ -17,11 +17,11 @@ namespace Infrastructure.Extensions
 {
     public static class InfrastructureServiceRegistration
     {
-        public static IServiceCollection AddInfrastructureService(this IServiceCollection services,
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services,
         IConfiguration configuration)
         {
-            services.AddDbContext<AppDbContext>(options =>
-               options.UseSqlServer(configuration.GetConnectionString("ConnectionString")));
+            //services.AddDbContext<AppDbContext>(options =>
+            //   options.UseSqlServer(configuration.GetConnectionString("ConnectionString")));
 
             services.AddTransient(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
