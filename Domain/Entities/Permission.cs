@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class Role : Entity<Role,long>
+    public class Permission : Entity<Permission, long>
     {
         public string Name { get; protected set; }
         public string? Description { get; protected set; }
-        public StatusType Status { get; protected set; }
+        public int PermissionGroupId { get; protected set; }
 
-        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public PermissionGroup PermissionGroup { get; set; }
         public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
     }
 }
