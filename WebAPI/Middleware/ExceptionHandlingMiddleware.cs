@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace WebAPI.Middleware;
 
@@ -17,7 +16,10 @@ public class ExceptionHandlingMiddleware
     {
         try
         {
+            _logger.LogError( "Beklenmeyen bir hata oluştu");
+
             await _next(context);
+
         }
         catch (Exception ex)
         {

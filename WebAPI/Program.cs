@@ -10,15 +10,14 @@ using ApplicationService.Extensions;
 using Infrastructure.Extensions;
 using Persistence.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Shared.Constants.Logs;
 
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .WriteTo.Console()
-    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
-    .CreateLogger();
+
+LoggerInitializer.LoggingInit();
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddPersistenceServices(builder.Configuration);
