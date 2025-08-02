@@ -9,7 +9,7 @@ namespace Domain.Entities
 {
     public class PermissionGroup : Entity<PermissionGroup, int>
     {
-        public string Name { get; protected set; }
+        public string Name { get; internal set; }
 
         public ICollection<Permission> Permissions { get; set; } = new List<Permission>();
     }

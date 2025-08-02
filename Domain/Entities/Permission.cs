@@ -10,9 +10,9 @@ namespace Domain.Entities
 {
     public class Permission : Entity<Permission, long>
     {
-        public string Name { get; protected set; }
-        public string? Description { get; protected set; }
-        public int PermissionGroupId { get; protected set; }
+        public string Name { get; internal set; }
+        public string? Description { get; internal set; }
+        public int PermissionGroupId { get; internal set; }
 
         public PermissionGroup PermissionGroup { get; set; }
         public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
