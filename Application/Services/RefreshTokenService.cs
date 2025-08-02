@@ -1,5 +1,9 @@
 ﻿using ApplicationService.Repositories;
 using Domain.Entities;
+using Domain.Entities.Common;
+using Domain.Factories;
+using Domain.Services.Abstract;
+using Domain.Services.Concrete;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,20 +15,17 @@ namespace ApplicationService.Services
     public class RefreshTokenService
     {
         private readonly IRefreshTokenRepository refreshTokenRepository;
+        private readonly IRefreshTokenDomainService refreshTokenDomainService;
 
-        public RefreshTokenService(IRefreshTokenRepository refreshTokenRepository)
+        public RefreshTokenService(IRefreshTokenRepository refreshTokenRepository, IRefreshTokenDomainService refreshTokenDomainService)
         {
             this.refreshTokenRepository = refreshTokenRepository;
+            this.refreshTokenDomainService = refreshTokenDomainService;
         }
 
         public async Task<RefreshToken> CreateRefreshTokenAsync(string userId)
         {
-            var refreshToken = new RefreshToken
-            {
-                Token = Guid.NewGuid().ToString("N"),
-                UserId = userId,
-                ExpiryDate = DateTime.UtcNow.AddDays(7)
-            };
+            var refreshToken = RefreshTokenFactory.Create(userId);
 
             await refreshTokenRepository.Add(refreshToken);
             return refreshToken;
@@ -37,7 +38,14 @@ namespace ApplicationService.Services
 
         public async Task RevokeRefreshTokenAsync(string token)
         {
-            await refreshTokenRepository.RevokeRefreshTokenAsync(token);
+            var refreshToken = await refreshTokenRepository.GetRefreshTokenAsync(token);
+
+            if (refreshToken != null)
+            {
+                refreshTokenDomainService.ChangeRevokeStatus(refreshToken, true);
+
+                await refreshTokenRepository.UpdateAsync(refreshToken);
+            }
         }
 
         public async Task<RefreshToken?> RotateRefreshTokenAsync(string oldToken, string userId)
@@ -47,14 +55,9 @@ namespace ApplicationService.Services
             if (entity is null)
                 return null;
 
-            entity.IsRevoked = true;
+            refreshTokenDomainService.ChangeRevokeStatus(entity, true);
 
-            var newToken = new RefreshToken
-            {
-                UserId = userId,
-                Token = Guid.NewGuid().ToString("N"),
-                ExpiryDate = DateTime.UtcNow.AddDays(7)
-            };
+            var newToken = RefreshTokenFactory.Create(userId);
 
             await refreshTokenRepository.Add(newToken);
 

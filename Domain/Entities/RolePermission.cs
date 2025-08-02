@@ -9,8 +9,8 @@ namespace Domain.Entities
 {
     public class RolePermission : Entity<RolePermission, long>
     {
-        public long RoleId { get; protected set; }
-        public long PermissionId { get; protected set; }
+        public long RoleId { get; internal set; }
+        public long PermissionId { get; internal set; }
 
         public Role Role { get; set; } = default!;
         public Permission Permission { get; set; } = default!;

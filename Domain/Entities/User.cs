@@ -6,14 +6,14 @@ namespace Domain.Entities;
 
 public class User : Entity<User, long>
 {
-    public string Email { get; protected set; }
-    public string FirstName { get; protected set; }
-    public string LastName { get; protected set; }
-    public StatusType Status { get; protected set; }
-    public string PasswordHash { get; protected set; } = null!;
-    public DateTime? LastPasswordChangeDate { get; protected set; }
-    public int LoginTryCount { get; protected set; }
-    public bool IsBlocked { get; protected set; }
+    public string Email { get; internal set; }
+    public string FirstName { get; internal set; }
+    public string LastName { get; internal set; }
+    public StatusType Status { get; internal set; }
+    public string PasswordHash { get; internal set; } = null!;
+    public DateTime? LastPasswordChangeDate { get; internal set; }
+    public int LoginTryCount { get; internal set; }
+    public bool IsBlocked { get; internal set; }
 
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

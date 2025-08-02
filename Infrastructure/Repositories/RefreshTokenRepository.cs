@@ -41,14 +41,9 @@ namespace Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task RevokeRefreshTokenAsync(string token)
+        public async Task<RefreshToken> GetRefreshTokenAsync(string token)
         {
-            var entity = await _dbContext.RefreshToken.FirstOrDefaultAsync(x => x.Token == token);
-            if (entity != null)
-            {
-                entity.IsRevoked = true;
-                await _dbContext.SaveChangesAsync();
-            }
+            return await _dbContext.RefreshToken.FirstOrDefaultAsync(x => x.Token == token);
         }
 
         public async Task<bool> ValidateRefreshTokenAsync(string token, string userId)

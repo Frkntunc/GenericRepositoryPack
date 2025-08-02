@@ -9,10 +9,10 @@ namespace Domain.Entities
 {
     public class RefreshToken : Entity<RefreshToken, Guid>
     {
-        public string Token { get; set; } = null!;
-        public string UserId { get; set; } = null!;
-        public DateTime ExpiryDate { get; set; }
-        public bool IsRevoked { get; set; } = false;
+        public string Token { get; internal set; } = null!;
+        public string UserId { get; internal set; } = null!;
+        public DateTime ExpiryDate { get; internal set; }
+        public bool IsRevoked { get; internal set; } = false;
         public bool IsExpired => DateTime.UtcNow >= ExpiryDate;
     }
 

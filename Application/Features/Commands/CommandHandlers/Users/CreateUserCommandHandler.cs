@@ -2,6 +2,7 @@
 using ApplicationService.Repositories;
 using ApplicationService.Repositories.Common;
 using Domain.Entities;
+using Domain.Factories;
 using MediatR;
 using Shared.Enums;
 using System;
@@ -23,16 +24,12 @@ namespace ApplicationService.Features.Commands.CommandHandlers.Users
 
         public async Task<Unit> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            var user = new User
-            {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Email = request.Email,
-                Status = StatusType.Available,
-                PasswordHash = "sadfghj",
-                LoginTryCount = 0,
-                IsBlocked = false
-            };
+            var user = UserFactory.Create(
+                request.Email,
+                request.FirstName,
+                request.LastName,
+                "hashpassword"
+            );
 
             await userRepository.AddAsync(user);
 
