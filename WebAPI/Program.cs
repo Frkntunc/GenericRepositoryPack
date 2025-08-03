@@ -10,6 +10,7 @@ using ApplicationService.Extensions;
 using Infrastructure.Extensions;
 using Persistence.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Domain.Extensions;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -20,6 +21,7 @@ Log.Logger = new LoggerConfiguration()
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplicationServices();
+builder.Services.AddDomainServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
