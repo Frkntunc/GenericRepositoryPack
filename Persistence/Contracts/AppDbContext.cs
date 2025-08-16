@@ -15,11 +15,12 @@ namespace Persistence.Contracts
 
         public DbSet<RefreshToken> RefreshToken => Set<RefreshToken>();
         public DbSet<User> User => Set<User>();
-        public DbSet<Role> Roles => Set<Role>();
-        public DbSet<Permission> Permissions => Set<Permission>();
-        public DbSet<UserRole> UserRoles => Set<UserRole>();
-        public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
-        public DbSet<PermissionGroup> PermissionGroups => Set<PermissionGroup>();
+        public DbSet<Role> Role => Set<Role>();
+        public DbSet<Permission> Permission => Set<Permission>();
+        public DbSet<UserRole> UserRole => Set<UserRole>();
+        public DbSet<RolePermission> RolePermission => Set<RolePermission>();
+        public DbSet<PermissionGroup> PermissionGroup => Set<PermissionGroup>();
+        public DbSet<DbVersionHistory> DbVersionHistory => Set<DbVersionHistory>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

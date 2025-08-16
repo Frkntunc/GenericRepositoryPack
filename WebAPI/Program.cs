@@ -92,8 +92,8 @@ var app = builder.Build();
 // Veritabanı otomatik migrate
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate(); // Eğer migration varsa uygular
+    var tracker = scope.ServiceProvider.GetRequiredService<MigrationTracker>();
+    await tracker.ApplyMigrationsAsync();
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
