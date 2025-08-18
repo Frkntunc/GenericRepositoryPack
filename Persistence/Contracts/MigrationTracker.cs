@@ -1,8 +1,10 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,11 +15,13 @@ namespace Persistence.Contracts
     {
         private readonly AppDbContext _context;
         private readonly IMigrator _migrator;
+        private readonly ILogger<MigrationTracker> _logger;
 
-        public MigrationTracker(AppDbContext context, IMigrator migrator)
+        public MigrationTracker(AppDbContext context, IMigrator migrator, ILogger<MigrationTracker> logger)
         {
             _context = context;
             _migrator = migrator;
+            _logger = logger;
         }
 
         public async Task ApplyMigrationsAsync()
@@ -27,18 +31,45 @@ namespace Persistence.Contracts
 
             foreach (var migration in pendingMigrations)
             {
-                await _migrator.MigrateAsync(migration);
+                _logger.LogInformation("Applying migration: {Migration}", migration);
 
-                _context.DbVersionHistory.Add(new DbVersionHistory
+                var stopwatch = Stopwatch.StartNew();
+                var status = "Success";
+                string errorMessage = null;
+
+                try
                 {
-                    MigrationName = migration,
-                    AppliedOn = DateTime.Now
-                });
-            }
+                    await _migrator.MigrateAsync(migration);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Migration failed!");
+                    status = "Failed";
+                    errorMessage = ex.Message;
+                }
+                finally
+                {
+                    stopwatch.Stop();
 
-            if (_context.ChangeTracker.HasChanges())
-            {
-                await _context.SaveChangesAsync();
+                    _context.DbVersionHistory.Add(new DbVersionHistory
+                    {
+                        MigrationName = migration,
+                        AppliedOn = DateTime.Now,
+                        AppliedBy = "System",
+                        AppVersion = "1.0.0",
+                        MachineName = Environment.MachineName,
+                        Duration = stopwatch.Elapsed,
+                        Status = status,
+                        ErrorMessage = errorMessage
+                    });
+
+                    await _context.SaveChangesAsync();
+
+                    if (status == "Failed")
+                        throw new InvalidOperationException($"Migration {migration} failed: {errorMessage}");
+                    else
+                        _logger.LogInformation("Migration applied successfully: {Migration}", migration);
+                }
             }
         }
     }

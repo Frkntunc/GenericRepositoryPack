@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Persistence.Contracts;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,9 @@ namespace Infrastructure.Extensions
             {
                 var context = sp.GetRequiredService<AppDbContext>();
                 var migrator = context.GetService<IMigrator>();
-                return new MigrationTracker(context, migrator);
+                var logger = sp.GetRequiredService<ILogger<MigrationTracker>>();
+
+                return new MigrationTracker(context, migrator, logger);
             });
 
             return services;

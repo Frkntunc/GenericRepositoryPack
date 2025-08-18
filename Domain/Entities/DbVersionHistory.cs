@@ -12,6 +12,11 @@ namespace Domain.Entities
         public string MigrationName { get; set; } = null!;
         public DateTime AppliedOn { get; set; } = DateTime.Now;
         public string AppliedBy { get; set; } = "System";
+        public string AppVersion { get; set; } = null!;
+        public string MachineName { get; set; } = null!;
+        public TimeSpan? Duration { get; set; } = null!;
+        public string Status { get; set; } = null!;
+        public string? ErrorMessage { get; set; }
     }
 
 }
