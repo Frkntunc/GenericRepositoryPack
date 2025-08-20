@@ -22,7 +22,6 @@ namespace Infrastructure.Repositories
         public async Task Add(RefreshToken refreshToken)
         {
             _dbContext.RefreshToken.Add(refreshToken);
-            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<RefreshToken> GetRefreshTokenAsync(string oldToken, string userId)
