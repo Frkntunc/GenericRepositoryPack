@@ -20,6 +20,11 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.AddServerHeader = false;
+});
+
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddDomainServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -101,6 +106,17 @@ app.UseMiddleware<JwtCookieMiddleware>();
 app.UseMiddleware<AuthMiddleware>();
 app.UseAuthorization();
 app.UseMiddleware<CsrfMiddleware>();
+
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        context.Response.Headers.Remove("Server");
+        context.Response.Headers.Remove("X-Powered-By");
+        return Task.CompletedTask;
+    });
+    await next();
+});
 
 if (app.Environment.IsDevelopment())
 {
