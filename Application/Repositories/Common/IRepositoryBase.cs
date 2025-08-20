@@ -12,7 +12,7 @@ namespace ApplicationService.Repositories.Common
     {
         Task<IReadOnlyList<T>> GetAllAsync();
         Task<T> GetAsync(Expression<Func<T, bool>> predicate);
-        Task<T> GetByIdAsync(int id);
+        Task<T> GetByIdAsync(long id);
 
         Task AddAsync(T entity);
         Task AddRangeAsync(IEnumerable<T> entities);

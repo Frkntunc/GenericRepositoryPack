@@ -3,6 +3,7 @@ using ApplicationService.Features.Commands.CommandRequests.Users;
 using ApplicationService.Repositories;
 using FluentAssertions;
 using MediatR;
+using Microsoft.Extensions.Caching.Distributed;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnitTest.Mocks;
+using MassTransit;
 
 namespace UnitTest.Application.User.Command
 {
@@ -18,11 +20,13 @@ namespace UnitTest.Application.User.Command
 
         private readonly Mock<IUserRepository> _mock;
         private readonly CreateUserCommandHandler _handler;
+        private readonly Mock<IPublishEndpoint> _publishEndpoint;
 
         public CreateUserCommandHandlerTest()
         {
             _mock = MockUserRepository.GetUserRepository();
-            _handler = new CreateUserCommandHandler(_mock.Object);
+            _publishEndpoint = new Mock<IPublishEndpoint>();
+            _handler = new CreateUserCommandHandler(_mock.Object, _publishEndpoint.Object);
         }
 
         [Fact]

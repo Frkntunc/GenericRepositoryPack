@@ -1,5 +1,6 @@
 ﻿using ApplicationService.Features.Queries.QueryRequests.User;
 using ApplicationService.Repositories;
+using Domain.Entities;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,19 @@ namespace ApplicationService.Features.Queries.QueryHandlers.User
         {
             var users = await userRepository.GetAllAsync();
 
-            return new List<UserDto>();
+            var userList = new List<UserDto>();
+
+            foreach (var item in users)
+            {
+                userList.Add(new UserDto
+                {
+                    Id = item.Id,
+                    Email = item.Email,
+                    Name = item.FirstName + " " + item.LastName
+                });
+            }
+
+            return userList;
         }
     }
 }

@@ -42,7 +42,7 @@ namespace Infrastructure.Repositories.Common
             return await _dbContext.Set<T>().SingleOrDefaultAsync(predicate);
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T> GetByIdAsync(long id)
         {
             return await _dbContext.Set<T>().FindAsync(id);
         }

@@ -24,9 +24,9 @@ public class UserController : BaseController
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetUser(int id)
+    public async Task<IActionResult> GetUser([FromBody] GetUserByIdQuery getUserByIdQuery)
     {
-        var user = new { Id = 1, Name = "Furkan" };
+        var user = await _mediator.Send(getUserByIdQuery);
         return Ok(user);
     }
 
