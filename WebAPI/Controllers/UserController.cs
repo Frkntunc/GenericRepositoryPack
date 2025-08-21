@@ -2,6 +2,7 @@ using ApplicationService.Features.Commands.CommandRequests.Users;
 using ApplicationService.Features.Queries.QueryRequests.User;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Middleware;
 
 namespace WebAPI.Controllers;
 
@@ -31,6 +32,7 @@ public class UserController : BaseController
     }
 
     [HttpPost]
+    //[Idempotent(60)] // Create butonuna birkaç kez üst üste basýldýðýnda hepsi için yeni user oluþturmasýn tek bir user oluþtursun (Idempotency-Key) / 1dk cache 
     public async Task<IActionResult> Create([FromBody] CreateUserCommand command)
     {
         await _mediator.Send(command);
