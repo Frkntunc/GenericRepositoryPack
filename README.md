@@ -7,9 +7,8 @@ Bu proje, kişisel projeler ve API çözümleri için esnek, ölçeklenebilir ve
 
 ##  Neden Bu Yapı?
 
-- **Clean Architecture** kullanımı sayesinde tablo ve kullanıcı arayüzü gibi dış katmanlardan iş mantığını izole eder; böylece test edilebilirlik, bakım ve genişletilebilirlik artar :contentReference[oaicite:3]{index=3}.  
-- **Modular Monolith** mimarisi, her bir modülün kendi domain, application, infrastructure ve presentation katmanlarını barındırmasını sağlar; modüller arası bağımlılık minimize edilir, kapsülleme artar :contentReference[oaicite:4]{index=4}.  
-- **Vertical Slice Architecture** ile her özellik odaklı tek dosya ya da klasör içinde toplanır; kod karmaşıklığı azalır ve yeni özellik eklemek daha hızlı ve basit olur :contentReference[oaicite:5]{index=5}.
+- **Clean Architecture** kullanımı sayesinde tablo ve kullanıcı arayüzü gibi dış katmanlardan iş mantığını izole eder; böylece test edilebilirlik, bakım ve genişletilebilirlik artar.  
+- **Modular Monolith** mimarisi, her bir modülün kendi domain, application, infrastructure ve presentation katmanlarını barındırmasını sağlar; modüller arası bağımlılık minimize edilir, kapsülleme artar.
 
 ---
 
@@ -20,7 +19,6 @@ Bu proje, kişisel projeler ve API çözümleri için esnek, ölçeklenebilir ve
 - JWT Authentication + Refresh Token sistemi  
 - Modüller arası gevşek bağ 
 - Her modülün veri bağımsızlığı (ayrı şema/dosya)  
-- Vertical Slice ile özelliğe dayalı kod organizasyonu  
 - Test altyapısı (Unit)
 - **Geliştirmeye Açık Mimari:**  
   - İlerleyen zamanlarda kolayca mikroservis mimarisine evrilebilir  
@@ -37,19 +35,8 @@ Bu proje, kişisel projeler ve API çözümleri için esnek, ölçeklenebilir ve
 | CQRS + MediatR         | Komut ve sorgu modelleri           |
 | ORM                    | Entity Framework Core              |
 | Authentication         | JWT + Refresh Token                |
-| Mimari                 | Clean Architecture, Modular Monolith, Vertical Slice |
+| Mimari                 | Clean Architecture, Modular Monolith |
 | Logging / Mapping      | Serilog, Mapster / AutoMapper (isteğe bağlı) |
 | Validasyon             | FluentValidation                   |
 | Dokümantasyon          | Swagger / NSwag                    |
 
----
-
-##  Kurulum & Başlangıç
-
-```bash
-git clone <repo-url>
-cd GenericApp.Infrastructure
-dotnet restore
-dotnet build
-dotnet run --project Presentation/Api
-# API çalıştıktan sonra https://localhost:5001/swagger adresinden dokümantasyona ulaşabilirsiniz.
