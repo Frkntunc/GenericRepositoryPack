@@ -105,6 +105,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<JwtCookieMiddleware>();
 app.UseMiddleware<AuthMiddleware>();
 app.UseAuthorization();
+app.UseMiddleware<IdempotencyMiddleware>();
 app.UseMiddleware<CsrfMiddleware>();
 
 app.Use(async (context, next) =>
