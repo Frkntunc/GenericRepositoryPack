@@ -42,14 +42,3 @@ Bu proje, kişisel projeler ve API çözümleri için esnek, ölçeklenebilir ve
 | Validasyon             | FluentValidation                   |
 | Dokümantasyon          | Swagger / NSwag                    |
 
----
-
-##  Kurulum & Başlangıç
-
-```bash
-git clone <repo-url>
-cd GenericApp.Infrastructure
-dotnet restore
-dotnet build
-dotnet run --project Presentation/Api
-# API çalıştıktan sonra https://localhost:5001/swagger adresinden dokümantasyona ulaşabilirsiniz.
