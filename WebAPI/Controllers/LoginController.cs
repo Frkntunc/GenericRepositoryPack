@@ -47,13 +47,15 @@ public class LoginController : BaseController
 
             var accessToken = tokenService.GenerateToken(userId, email, role);
             var refreshToken = await refreshTokenService.CreateRefreshTokenAsync(userId);
+            var csrfToken = Guid.NewGuid().ToString("N");
 
-            CookieHelper.SetAuthCookies(Response, accessToken, refreshToken.Token);
+            CookieHelper.SetAuthCookies(Response, accessToken, refreshToken.Token, csrfToken);
 
             return Ok(new
             {
                 accessToken,
-                refreshToken = refreshToken.Token
+                refreshToken = refreshToken.Token,
+                CsrfToken = csrfToken
             });
         }
         else
@@ -72,12 +74,15 @@ public class LoginController : BaseController
             throw new UnauthorizedException("Refresh token geçersiz veya süresi dolmuþ.", ErrorCodes.InvalidRefreshToken);
 
         var newAccessToken = tokenService.GenerateToken(userContext.UserId, userContext.Email, userContext.Role);
+        var newCsrfToken = Guid.NewGuid().ToString("N");
 
-        CookieHelper.SetAuthCookies(Response, newAccessToken, newRefreshToken.Token);
+        CookieHelper.SetAuthCookies(Response, newAccessToken, newRefreshToken.Token, newCsrfToken);
+
         return Ok(new
         {
             accessToken = newAccessToken,
-            refreshToken = newRefreshToken.Token
+            refreshToken = newRefreshToken.Token,
+            CsrfToken = newCsrfToken
         });
     }
 

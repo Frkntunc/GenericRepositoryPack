@@ -1,16 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc.ApplicationParts;
-using Serilog;
-using Microsoft.AspNetCore.Mvc;
-using Shared.Enums;
+﻿using ApplicationService.Extensions;
 using ApplicationService.SharedKernel.Auth;
-using WebAPI.Middleware;
-using WebAPI.Filters;
-using Microsoft.OpenApi.Models;
-using ApplicationService.Extensions;
-using Infrastructure.Extensions;
-using Persistence.Contracts;
-using Microsoft.EntityFrameworkCore;
 using Domain.Extensions;
+using Infrastructure.Extensions;
+using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using Persistence.Contracts;
+using Serilog;
+using Shared.Enums;
+using WebAPI.Filters;
+using WebAPI.Middleware;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -61,6 +62,12 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.Secure = CookieSecurePolicy.Always; //sadece HTTPS
+    options.MinimumSameSitePolicy = SameSiteMode.Strict;
+    options.HttpOnly = HttpOnlyPolicy.Always;
+});
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<CsrfOptions>(builder.Configuration.GetSection("CsrfOptions"));
@@ -105,6 +112,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<JwtCookieMiddleware>();
 app.UseMiddleware<AuthMiddleware>();
 app.UseAuthorization();
+app.UseCookiePolicy();
 app.UseMiddleware<IdempotencyMiddleware>();
 app.UseMiddleware<CsrfMiddleware>();
 
