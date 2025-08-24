@@ -5,109 +5,116 @@ using Infrastructure.Extensions;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Persistence.Contracts;
 using Serilog;
 using Shared.Enums;
+using Shared.Exceptions;
+using System.Globalization;
 using WebAPI.Filters;
 using WebAPI.Middleware;
 
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .WriteTo.Console()
-    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
-    .CreateLogger();
-
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.ConfigureKestrel(options =>
+// -------------------------------------------------
+// Logging (Serilog)
+// -------------------------------------------------
+builder.Host.UseSerilog((context, services, configuration) =>
 {
-    options.AddServerHeader = false;
+    configuration
+        .MinimumLevel.Information()
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day);
 });
 
+// -------------------------------------------------
+// Services
+// -------------------------------------------------
+builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
+builder.Services.AddLocalization();
+
+// Katman bağımlılıkları
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddDomainServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddPersistenceServices(builder.Configuration);
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 
-    var jwtSecurityScheme = new OpenApiSecurityScheme
+// Swagger + JWT
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(opt =>
+{
+    opt.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+    var jwtScheme = new OpenApiSecurityScheme
     {
         Scheme = "bearer",
         BearerFormat = "JWT",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
-        Description = "JWT Bearer token ile yetkilendirme için. Örn: Bearer {token}",
-
-        Reference = new OpenApiReference
-        {
-            Id = "Bearer",
-            Type = ReferenceType.SecurityScheme
-        }
+        Description = "JWT Bearer token kullanın. Örn: Bearer {token}",
+        Reference = new OpenApiReference { Id = "Bearer", Type = ReferenceType.SecurityScheme }
     };
 
-    options.AddSecurityDefinition("Bearer", jwtSecurityScheme);
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            jwtSecurityScheme,
-            Array.Empty<string>()
-        }
-    });
+    opt.AddSecurityDefinition("Bearer", jwtScheme);
+    opt.AddSecurityRequirement(new OpenApiSecurityRequirement { { jwtScheme, Array.Empty<string>() } });
 });
 
-builder.Services.Configure<CookiePolicyOptions>(options =>
+// Cookie ayarları
+builder.Services.Configure<CookiePolicyOptions>(opt =>
 {
-    options.Secure = CookieSecurePolicy.Always; //sadece HTTPS
-    options.MinimumSameSitePolicy = SameSiteMode.Strict;
-    options.HttpOnly = HttpOnlyPolicy.Always;
+    opt.Secure = CookieSecurePolicy.Always;
+    opt.MinimumSameSitePolicy = SameSiteMode.Strict;
+    opt.HttpOnly = HttpOnlyPolicy.Always;
 });
 
+// Config binding
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<CsrfOptions>(builder.Configuration.GetSection("CsrfOptions"));
 
+// Controllers + Filters
 builder.Services
-    .AddControllers()
+    .AddControllers(o =>
+    {
+        o.Filters.Add<UnitOfWorkSaveChangesFilter>();
+        o.Filters.Add<ResultWrappingFilter>();
+    })
     .PartManager.ApplicationParts.Add(new AssemblyPart(typeof(WebAPI.Controllers.UserController).Assembly));
 
-builder.Services.Configure<ApiBehaviorOptions>(options =>
+builder.Services.Configure<ApiBehaviorOptions>(opt =>
 {
-    options.InvalidModelStateResponseFactory = context =>
+    opt.InvalidModelStateResponseFactory = context =>
     {
-        var firstError = context.ModelState
-            .Where(x => x.Value?.Errors.Count > 0)
-            .SelectMany(kvp => kvp.Value.Errors)
-            .Select(e => e.ErrorMessage)
-            .FirstOrDefault() ?? "Geçersiz istek.";
-
-        throw new ApplicationService.SharedKernel.Exceptions.ValidationException(firstError, ErrorCodes.ValidationError);
+        throw new ValidationException(ErrorCodes.ValidationError);
     };
 });
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UnitOfWorkSaveChangesFilter>();
 
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add<UnitOfWorkSaveChangesFilter>();
-    options.Filters.Add<ResultWrappingFilter>();
-});
-
 var app = builder.Build();
 
-// Veritabanı otomatik migrate
+// -------------------------------------------------
+// Middleware pipeline
+// -------------------------------------------------
+
+var supportedCultures = new[] { "en", "tr" };
+app.UseRequestLocalization(o =>
+{
+    o.SetDefaultCulture("en");
+    o.AddSupportedCultures(supportedCultures);
+    o.AddSupportedUICultures(supportedCultures);
+});
+
+// Database migration
 using (var scope = app.Services.CreateScope())
 {
     var tracker = scope.ServiceProvider.GetRequiredService<MigrationTracker>();
     await tracker.ApplyMigrationsAsync();
 }
 
+// Exception & Security Middlewares
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<JwtCookieMiddleware>();
 app.UseMiddleware<AuthMiddleware>();
@@ -116,28 +123,27 @@ app.UseCookiePolicy();
 app.UseMiddleware<IdempotencyMiddleware>();
 app.UseMiddleware<CsrfMiddleware>();
 
-app.Use(async (context, next) =>
+// Gereksiz headerları kaldır
+app.Use(async (ctx, next) =>
 {
-    context.Response.OnStarting(() =>
+    ctx.Response.OnStarting(() =>
     {
-        context.Response.Headers.Remove("Server");
-        context.Response.Headers.Remove("X-Powered-By");
+        ctx.Response.Headers.Remove("Server");
+        ctx.Response.Headers.Remove("X-Powered-By");
         return Task.CompletedTask;
     });
     await next();
 });
 
+// Swagger (sadece dev)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.MapGet("/", context =>
-{
-    context.Response.Redirect("/swagger");
-    return Task.CompletedTask;
-});
-
+// Default redirect
+app.MapGet("/", () => Results.Redirect("/swagger"));
 app.MapControllers();
+
 app.Run();

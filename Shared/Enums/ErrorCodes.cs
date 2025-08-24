@@ -13,6 +13,7 @@ namespace Shared.Enums
         // Genel
         ValidationError = 1001,
         NotFound = 1002,
+        UnexpectedError = 1003,
 
         // Kullanıcı
         UserNotFound = 2001,

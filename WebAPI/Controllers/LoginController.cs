@@ -3,13 +3,13 @@ using ApplicationService.Services;
 using ApplicationService.SharedKernel;
 using ApplicationService.SharedKernel.Auth;
 using ApplicationService.SharedKernel.Auth.Common;
-using ApplicationService.SharedKernel.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Model.Auth;
 using WebAPI.Model.Login;
 using WebAPI.Helper;
 using ApplicationService.Repositories;
+using Shared.Exceptions;
 
 namespace WebAPI.Controllers;
 
@@ -35,7 +35,7 @@ public class LoginController : BaseController
     {
         var user = await userRepository.GetByEmailAsync(request.Email);
         if (user == null)
-            throw new NotFoundException("Mail veya þifre hatalý", ErrorCodes.UserNotFound);
+            throw new NotFoundException(ErrorCodes.UserNotFound);
 
         var passwordValid = passwordHasherService.VerifyHashedPassword(user.PasswordHash, request.Password);
 
@@ -60,7 +60,7 @@ public class LoginController : BaseController
         }
         else
         {
-            throw new NotFoundException("Mail veya þifre hatalý", ErrorCodes.UserNotFound);
+            throw new NotFoundException(ErrorCodes.UserNotFound);
         }
     }
 
@@ -71,7 +71,7 @@ public class LoginController : BaseController
         var newRefreshToken = await refreshTokenService.RotateRefreshTokenAsync(model.RefreshToken, userContext.UserId);
 
         if (newRefreshToken == null)
-            throw new UnauthorizedException("Refresh token geçersiz veya süresi dolmuþ.", ErrorCodes.InvalidRefreshToken);
+            throw new UnauthorizedException(ErrorCodes.InvalidRefreshToken);
 
         var newAccessToken = tokenService.GenerateToken(userContext.UserId, userContext.Email, userContext.Role);
         var newCsrfToken = Guid.NewGuid().ToString("N");
