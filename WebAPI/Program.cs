@@ -3,6 +3,7 @@ using ApplicationService.SharedKernel.Auth;
 using Domain.Extensions;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.OpenApi.Models;
@@ -100,12 +101,17 @@ var app = builder.Build();
 // -------------------------------------------------
 
 var supportedCultures = new[] { "en", "tr" };
-app.UseRequestLocalization(o =>
+var localizationOptions = new RequestLocalizationOptions
 {
-    o.SetDefaultCulture("en");
-    o.AddSupportedCultures(supportedCultures);
-    o.AddSupportedUICultures(supportedCultures);
-});
+    DefaultRequestCulture = new RequestCulture("en"),
+    SupportedCultures = supportedCultures.Select(c => new CultureInfo(c)).ToList(),
+    SupportedUICultures = supportedCultures.Select(c => new CultureInfo(c)).ToList()
+};
+
+// Accept-Language header’ını dikkate al
+localizationOptions.RequestCultureProviders.Insert(0, new AcceptLanguageHeaderRequestCultureProvider());
+
+app.UseRequestLocalization(localizationOptions);
 
 // Database migration
 using (var scope = app.Services.CreateScope())
