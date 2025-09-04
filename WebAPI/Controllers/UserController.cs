@@ -2,6 +2,7 @@ using ApplicationService.Features.Commands.CommandRequests.Users;
 using ApplicationService.Features.Queries.QueryRequests.User;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Middleware;
 
 namespace WebAPI.Controllers;
 
@@ -24,13 +25,14 @@ public class UserController : BaseController
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetUser(int id)
+    public async Task<IActionResult> GetUser([FromBody] GetUserByIdQuery getUserByIdQuery)
     {
-        var user = new { Id = 1, Name = "Furkan" };
+        var user = await _mediator.Send(getUserByIdQuery);
         return Ok(user);
     }
 
     [HttpPost]
+    //[Idempotent(60)] // Create butonuna birkaç kez üst üste basýldýðýnda hepsi için yeni user oluþturmasýn tek bir user oluþtursun (Idempotency-Key) / 1dk cache 
     public async Task<IActionResult> Create([FromBody] CreateUserCommand command)
     {
         await _mediator.Send(command);

@@ -23,13 +23,11 @@ namespace Infrastructure.Repositories.Common
         public async Task AddAsync(T entity)
         {
             var result = _dbContext.Set<T>().Add(entity);
-            await _dbContext.SaveChangesAsync();
         }
 
         public virtual async Task AddRangeAsync(IEnumerable<T> entities)
         {
             await _dbContext.Set<T>().AddRangeAsync(entities);
-            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<IReadOnlyList<T>> GetAllAsync()
@@ -42,7 +40,7 @@ namespace Infrastructure.Repositories.Common
             return await _dbContext.Set<T>().SingleOrDefaultAsync(predicate);
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T> GetByIdAsync(long id)
         {
             return await _dbContext.Set<T>().FindAsync(id);
         }
@@ -50,26 +48,22 @@ namespace Infrastructure.Repositories.Common
         public async Task RemoveAsync(T entity)
         {
             _dbContext.Set<T>().Remove(entity);
-            await _dbContext.SaveChangesAsync();
         }
 
         public async Task RemoveRangeAsync(IEnumerable<T> entities)
         {
             _dbContext.Set<T>().RemoveRange(entities);
-            await _dbContext.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(T entity)
         {
             _dbContext.Entry(entity).State = EntityState.Modified;
-            await _dbContext.SaveChangesAsync();
 
         }
 
         public async Task UpdateRangeAsync(IEnumerable<T> entities)
         {
             _dbContext.Entry(entities).State = EntityState.Modified;
-            await _dbContext.SaveChangesAsync();
         }
     }
 }

@@ -11,9 +11,9 @@ namespace Domain.Entities
 {
     public class UserRole : Entity<UserRole,long>
     {
-        public long UserId { get; protected set; }
-        public User User { get; protected set; }
-        public long RoleId { get; protected set; }
-        public Role Role { get; protected set; }
+        public long UserId { get; internal set; }
+        public User User { get; internal set; }
+        public long RoleId { get; internal set; }
+        public Role Role { get; internal set; }
     }
 }

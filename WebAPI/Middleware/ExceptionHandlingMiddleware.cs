@@ -1,4 +1,11 @@
-﻿using System.Text.Json;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
+using Shared.Enums;
+using Shared.Exceptions;
+using Shared.Resources;
+using System.Net;
+using System.Text.Json;
+using WebAPI.DTOs;
 
 namespace WebAPI.Middleware;
 
@@ -6,12 +13,18 @@ public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+    private readonly IStringLocalizer<ErrorCodeResources> _localizer;
 
-    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+    public ExceptionHandlingMiddleware(
+        RequestDelegate next,
+        ILogger<ExceptionHandlingMiddleware> logger,
+        IStringLocalizer<ErrorCodeResources> localizer)
     {
         _next = next;
         _logger = logger;
+        _localizer = localizer;
     }
+
     public async Task InvokeAsync(HttpContext context)
     {
         try
@@ -23,50 +36,37 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Beklenmeyen bir hata oluştu");
-
-            context.Response.ContentType = "application/json";
-
-            int statusCode;
-            object problem;
-
-            if (ex is ApplicationService.SharedKernel.Exceptions.NotFoundException nfEx)
-            {
-                statusCode = StatusCodes.Status404NotFound;
-                problem = new
-                {
-                    title = "Bulunamadı",
-                    detail = nfEx.Message,
-                    code = (int)nfEx.Code,
-                    status = 404
-                };
-            }
-            else if (ex is ApplicationService.SharedKernel.Exceptions.ValidationException valEx)
-            {
-                statusCode = StatusCodes.Status400BadRequest;
-                problem = new
-                {
-                    title = "Doğrulama hatası",
-                    message = valEx.MessageText,
-                    code = (int)valEx.Code,
-                    status = 400
-                };
-            }
-            else
-            {
-                statusCode = StatusCodes.Status500InternalServerError;
-                problem = new
-                {
-                    title = "Bir hata oluştu",
-                    detail = ex.Message,
-                    status = 500
-                };
-            }
-
-            context.Response.StatusCode = statusCode;
-            var json = JsonSerializer.Serialize(problem);
-            await context.Response.WriteAsync(json);
+            await HandleExceptionAsync(context, ex);
         }
     }
 
+    private async Task HandleExceptionAsync(HttpContext context, Exception ex)
+    {
+        var (statusCode, errorCode) = ex switch
+        {
+            NotFoundException nfEx => (StatusCodes.Status404NotFound, nfEx.ErrorCode),
+            ValidationException valEx => (StatusCodes.Status400BadRequest, valEx.ErrorCode),
+            _ => (StatusCodes.Status500InternalServerError, ErrorCodes.UnexpectedError)
+        };
+
+        var message = _localizer[errorCode.ToString()];
+        var problem = new ProblemDetails
+        {
+            Title = message,
+            Detail = ex.Message,
+            Status = statusCode,
+            Type = $"https://httpstatuses.com/{statusCode}",
+            Extensions =
+            {
+                ["code"] = errorCode.ToString()
+            }
+        };
+
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = statusCode;
+
+        _logger.LogError(ex, "ErrorCode: {ErrorCode}, Message: {Message}", errorCode, message);
+
+        await context.Response.WriteAsJsonAsync(problem);
+    }
 }

@@ -1,12 +1,15 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Persistence.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Persistence.Contracts;
 
 namespace Infrastructure.Extensions
 {
@@ -17,6 +20,15 @@ namespace Infrastructure.Extensions
         {
             services.AddDbContext<AppDbContext>(options =>
                options.UseSqlServer(configuration.GetConnectionString("ConnectionString")));
+
+            services.AddScoped<MigrationTracker>(sp =>
+            {
+                var context = sp.GetRequiredService<AppDbContext>();
+                var migrator = context.GetService<IMigrator>();
+                var logger = sp.GetRequiredService<ILogger<MigrationTracker>>();
+
+                return new MigrationTracker(context, migrator, logger);
+            });
 
             return services;
         }

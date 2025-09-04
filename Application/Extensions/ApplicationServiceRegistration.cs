@@ -1,11 +1,15 @@
-﻿using ApplicationService.SharedKernel.Auth.Common;
+﻿using ApplicationService.Features.Common;
+using ApplicationService.Repositories;
+using ApplicationService.Services;
 using ApplicationService.SharedKernel;
+using ApplicationService.SharedKernel.Auth;
+using ApplicationService.SharedKernel.Auth.Common;
+using FluentValidation;
+using MassTransit;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using ApplicationService.Services;
-using ApplicationService.SharedKernel.Auth;
-using FluentValidation;
 using System.Reflection.Metadata;
 
 namespace ApplicationService.Extensions
@@ -13,7 +17,8 @@ namespace ApplicationService.Extensions
     public static class ApplicationServiceRegistration
     {
         //Application'da kullanmak istediğimiz servisleri implemente ediyoruz
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services,
+        IConfiguration configuration)
         {
             services.AddAutoMapper(typeof(AssemblyReference).Assembly);
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
@@ -22,6 +27,15 @@ namespace ApplicationService.Extensions
             services.AddSingleton<JwtTokenService>();
             services.AddScoped<RefreshTokenService>();
             services.AddScoped<IPasswordHasherService, PasswordHasherService>();
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = configuration.GetConnectionString("Redis");
+                options.InstanceName = "AppCache_";
+            });
+
+            services.AddScoped<ICacheService, CacheService>();
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
 
             return services;
         }

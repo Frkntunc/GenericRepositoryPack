@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Common;
+using Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,11 @@ namespace Domain.Entities
 {
     public class Role : Entity<Role,long>
     {
+        public string Name { get; internal set; }
+        public string? Description { get; internal set; }
+        public StatusType Status { get; internal set; }
 
+        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
     }
 }
