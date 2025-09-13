@@ -127,6 +127,10 @@ app.UseMiddleware<AuthMiddleware>();
 app.UseAuthorization();
 app.UseCookiePolicy();
 app.UseMiddleware<IdempotencyMiddleware>();
+app.UseXssProtection(options =>
+{
+    options.SanitizeRequests = true;
+});
 app.UseMiddleware<CsrfMiddleware>();
 
 // Gereksiz headerları kaldır
