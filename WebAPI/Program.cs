@@ -1,16 +1,18 @@
-﻿using ApplicationService.Extensions;
-using ApplicationService.SharedKernel.Auth;
+﻿using AngleSharp;
+using ApplicationService.Extensions;
 using Domain.Extensions;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using Persistence.Contracts;
 using Serilog;
 using Shared.Enums;
 using Shared.Exceptions;
+using Shared.Options;
 using System.Globalization;
 using WebAPI.Filters;
 using WebAPI.Middleware;
@@ -34,6 +36,13 @@ builder.Host.UseSerilog((context, services, configuration) =>
 // -------------------------------------------------
 builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
 builder.Services.AddLocalization();
+
+// Config binding
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+builder.Services.Configure<CsrfOptions>(builder.Configuration.GetSection("Csrf"));
+builder.Services.Configure<CacheOptions>(builder.Configuration.GetSection("Cache"));
+builder.Services.Configure<ConnectionStringsOptions>(builder.Configuration.GetSection("ConnectionStrings"));
+builder.Services.Configure<QueueOptions>(builder.Configuration.GetSection("Queue"));
 
 // Katman bağımlılıkları
 builder.Services.AddApplicationServices(builder.Configuration);
@@ -69,10 +78,6 @@ builder.Services.Configure<CookiePolicyOptions>(opt =>
     opt.MinimumSameSitePolicy = SameSiteMode.Strict;
     opt.HttpOnly = HttpOnlyPolicy.Always;
 });
-
-// Config binding
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
-builder.Services.Configure<CsrfOptions>(builder.Configuration.GetSection("CsrfOptions"));
 
 // Controllers + Filters
 builder.Services

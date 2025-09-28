@@ -1,5 +1,5 @@
-﻿using ApplicationService.SharedKernel.Auth;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using Shared.Options;
 using System.IO;
 
 namespace WebAPI.Middleware

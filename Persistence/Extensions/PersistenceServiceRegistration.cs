@@ -5,21 +5,22 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Persistence.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using Shared.Options;
 
 namespace Infrastructure.Extensions
 {
     public static class PersistenceServiceRegistration
     {
-        public static IServiceCollection AddPersistenceServices(this IServiceCollection services,
-        IConfiguration configuration)
+        public static IServiceCollection AddPersistenceServices(
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
-            services.AddDbContext<AppDbContext>(options =>
-               options.UseSqlServer(configuration.GetConnectionString("ConnectionString")));
+            services.AddDbContext<AppDbContext>((sp, options) =>
+            {
+                var connOptions = sp.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
+                options.UseSqlServer(connOptions.SqlServerConnectionString);
+            });
 
             services.AddScoped<MigrationTracker>(sp =>
             {
@@ -33,4 +34,5 @@ namespace Infrastructure.Extensions
             return services;
         }
     }
+
 }

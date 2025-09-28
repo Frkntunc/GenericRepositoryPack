@@ -7,7 +7,9 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Persistence.Contracts;
+using Shared.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,12 +35,13 @@ namespace Infrastructure.Extensions
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    var rabbitConfig = configuration.GetSection("RabbitMq");
+                    var serviceProvider = services.BuildServiceProvider();
+                    var queueOptions = serviceProvider.GetRequiredService<IOptions<QueueOptions>>().Value;
 
-                    cfg.Host(rabbitConfig["Host"], h =>
+                    cfg.Host(queueOptions.RabbitMqHost, h =>
                     {
-                        h.Username(rabbitConfig["Username"]);
-                        h.Password(rabbitConfig["Password"]);
+                        h.Username(queueOptions.RabbitMqUsername);
+                        h.Password(queueOptions.RabbitMqPassword);
                     });
 
                     cfg.ReceiveEndpoint("cache-invalidation-queue", e =>

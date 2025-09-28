@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApplicationService.SharedKernel.Auth
+namespace Shared.Options
 {
     public class JwtOptions
     {

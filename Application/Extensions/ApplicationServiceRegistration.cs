@@ -5,12 +5,14 @@ using ApplicationService.SharedKernel;
 using ApplicationService.SharedKernel.Auth;
 using ApplicationService.SharedKernel.Auth.Common;
 using FluentValidation;
-using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Shared.Options;
 using System.Reflection;
 using System.Reflection.Metadata;
+using Microsoft.Extensions.Options;
 
 namespace ApplicationService.Extensions
 {
@@ -30,8 +32,10 @@ namespace ApplicationService.Extensions
 
             services.AddStackExchangeRedisCache(options =>
             {
-                options.Configuration = configuration.GetConnectionString("Redis");
-                options.InstanceName = "AppCache_";
+                var serviceProvider = services.BuildServiceProvider();
+                var redisOptions = serviceProvider.GetRequiredService<IOptions<CacheOptions>>().Value;
+                options.Configuration = redisOptions.RedisConfiguration;
+                options.InstanceName = redisOptions.RedisInstanceName;
             });
 
             services.AddScoped<ICacheService, CacheService>();

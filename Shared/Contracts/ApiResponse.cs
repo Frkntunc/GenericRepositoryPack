@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApplicationService.SharedKernel.Contracts
+namespace Shared.Contracts
 {
     public class ApiResponse<T>
     {
