@@ -1,7 +1,7 @@
 #  Generic Application (Modular Monolith + Clean Architecture)
 
 **Proje Amacı**  
-Bu proje, kişisel projeler ve API çözümleri için esnek, ölçeklenebilir ve yeniden kullanılabilir bir altyapı sağlar. Clean Architecture, CQRS, Modular Monolith ve Vertical Slice yaklaşımlarını bir araya getirerek hem modüler hem de sürdürülebilir bir yapı sunar.
+Bu proje, kişisel projeler ve API çözümleri için esnek, ölçeklenebilir ve yeniden kullanılabilir bir altyapı sağlar. Clean Architecture, CQRS ve Modular Monolith yaklaşımlarını bir araya getirerek hem modüler hem de sürdürülebilir bir yapı sunar.
 
 ---
 
@@ -36,7 +36,7 @@ Bu proje, kişisel projeler ve API çözümleri için esnek, ölçeklenebilir ve
 | ORM                    | Entity Framework Core              |
 | Authentication         | JWT + Refresh Token                |
 | Mimari                 | Clean Architecture, Modular Monolith |
-| Logging / Mapping      | Serilog, Mapster / AutoMapper (isteğe bağlı) |
+| Logging / Mapping      | Serilog / AutoMapper (isteğe bağlı) |
 | Validasyon             | FluentValidation                   |
-| Dokümantasyon          | Swagger / NSwag                    |
+| Dokümantasyon          | Swagger                     |
 
