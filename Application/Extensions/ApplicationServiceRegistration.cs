@@ -1,4 +1,5 @@
 ﻿using ApplicationService.Features.Common;
+using ApplicationService.Features.Common.Application.Common.Behaviors;
 using ApplicationService.Repositories;
 using ApplicationService.Services;
 using ApplicationService.SharedKernel;
@@ -9,10 +10,10 @@ using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using Shared.Options;
 using System.Reflection;
 using System.Reflection.Metadata;
-using Microsoft.Extensions.Options;
 
 namespace ApplicationService.Extensions
 {
@@ -40,6 +41,9 @@ namespace ApplicationService.Extensions
 
             services.AddScoped<ICacheService, CacheService>();
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
+
+            services.AddScoped<IDeadLetterService, DeadLetterService>();
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RetryAndDeadLetterBehavior<,>));
 
             return services;
         }

@@ -1,4 +1,5 @@
 ﻿using ApplicationService.Features.Common;
+using ApplicationService.Features.Common.Application.Common.Behaviors;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace ApplicationService.Features.Commands.CommandRequests.Users
 {
+    [EnableRetryAndDlq]
     public class CreateUserCommand : Command, IRequest<Unit>
     {
         public string Email { get; }

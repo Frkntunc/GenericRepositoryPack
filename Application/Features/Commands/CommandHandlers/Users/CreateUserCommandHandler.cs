@@ -1,4 +1,5 @@
 ﻿using ApplicationService.Features.Commands.CommandRequests.Users;
+using ApplicationService.Features.Common.Application.Common.Behaviors;
 using ApplicationService.Features.Queries.QueryRequests.User;
 using ApplicationService.Repositories;
 using Domain.Factories;
