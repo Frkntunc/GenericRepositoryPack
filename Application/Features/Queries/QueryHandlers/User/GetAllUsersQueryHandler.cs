@@ -24,6 +24,8 @@ namespace ApplicationService.Features.Queries.QueryHandlers.User
         {
             var users = await userRepository.GetAllAsync();
 
+            System.Threading.Thread.Sleep(20000);
+
             var userList = new List<UserDto>();
 
             foreach (var item in users)

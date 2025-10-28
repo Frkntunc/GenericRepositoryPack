@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using Persistence.Contracts;
@@ -13,7 +14,9 @@ using Serilog;
 using Shared.Enums;
 using Shared.Exceptions;
 using Shared.Options;
+using StackExchange.Redis;
 using System.Globalization;
+using System.Threading.RateLimiting;
 using WebAPI.Filters;
 using WebAPI.Middleware;
 
@@ -37,12 +40,16 @@ builder.Host.UseSerilog((context, services, configuration) =>
 builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
 builder.Services.AddLocalization();
 
+var redisConn = builder.Configuration.GetSection("Cache")["RedisConfiguration"];
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConn));
+
 // Config binding
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<CsrfOptions>(builder.Configuration.GetSection("Csrf"));
 builder.Services.Configure<CacheOptions>(builder.Configuration.GetSection("Cache"));
 builder.Services.Configure<ConnectionStringsOptions>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<QueueOptions>(builder.Configuration.GetSection("Queue"));
+builder.Services.Configure<RateLimitingOptions>(builder.Configuration.GetSection("RateLimiting"));
 
 // Katman bağımlılıkları
 builder.Services.AddApplicationServices(builder.Configuration);
@@ -127,6 +134,8 @@ using (var scope = app.Services.CreateScope())
 
 // Exception & Security Middlewares
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseForwardedHeaders(); // Proxy arkasında çalışıyorsa gerçek IP'yi alabilmek için
+app.UseMiddleware<RateLimitingMiddleware>();
 app.UseMiddleware<JwtCookieMiddleware>();
 app.UseMiddleware<AuthMiddleware>();
 app.UseAuthorization();
@@ -159,6 +168,6 @@ if (app.Environment.IsDevelopment())
 
 // Default redirect
 app.MapGet("/", () => Results.Redirect("/swagger"));
-app.MapControllers();
+app.MapControllers().RequireRateLimiting("RedisUserPolicy");
 
 app.Run();

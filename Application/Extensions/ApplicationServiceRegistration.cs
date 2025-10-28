@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Options;
 using Shared.Options;
+using StackExchange.Redis;
 using System.Reflection;
 using System.Reflection.Metadata;
 
@@ -38,6 +39,9 @@ namespace ApplicationService.Extensions
                 options.Configuration = redisOptions.RedisConfiguration;
                 options.InstanceName = redisOptions.RedisInstanceName;
             });
+
+            services.AddSingleton<IRateLimitService, RateLimitService>();
+            services.AddSingleton<IConcurrencyService, ConcurrencyService>();
 
             services.AddScoped<ICacheService, CacheService>();
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));

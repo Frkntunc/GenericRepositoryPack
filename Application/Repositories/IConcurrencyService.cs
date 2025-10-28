@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace ApplicationService.Repositories
 {
-    public interface ICacheableRequest
+    public interface IConcurrencyService
     {
-        string CacheKey { get; }
-        TimeSpan? AbsoluteExpirationRelativeToNow => TimeSpan.FromMinutes(1);
+        Task<bool> TryEnterAsync(string key, int maxConcurrent, TimeSpan ttl);
+        Task ExitAsync(string key);
     }
-
 }
