@@ -9,7 +9,7 @@ namespace Shared.Exceptions
 {
     public class NotFoundException : BaseAppException
     {
-        public NotFoundException(ErrorCodes code) : base(code)
+        public NotFoundException(string code) : base(code)
         {
         }
     }

@@ -1,16 +1,17 @@
 ﻿using ApplicationService.Repositories;
 using MediatR;
+using Shared.DTOs.Common;
+using Shared.DTOs.User;
 using Shared.Static;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Users.Application.DTO;
 
 namespace ApplicationService.Features.Queries.QueryRequests.User
 {
-    public class GetUserByIdQuery : IRequest<UserDto>, ICacheableRequest
+    public class GetUserByIdQuery : IRequest<ServiceResponse<UserDto>>, ICacheableRequest
     {
         public long Id { get; set; }
 

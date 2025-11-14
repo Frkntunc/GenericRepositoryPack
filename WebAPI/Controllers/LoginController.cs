@@ -10,6 +10,7 @@ using WebAPI.Model.Login;
 using WebAPI.Helper;
 using ApplicationService.Repositories;
 using Shared.Exceptions;
+using Shared.Constants;
 
 namespace WebAPI.Controllers;
 
@@ -35,7 +36,7 @@ public class LoginController : BaseController
     {
         var user = await userRepository.GetByEmailAsync(request.Email);
         if (user == null)
-            throw new NotFoundException(ErrorCodes.UserNotFound);
+            throw new NotFoundException(ResponseCodes.UserNotFound);
 
         var passwordValid = passwordHasherService.VerifyHashedPassword(user.PasswordHash, request.Password);
 
@@ -60,7 +61,7 @@ public class LoginController : BaseController
         }
         else
         {
-            throw new NotFoundException(ErrorCodes.UserNotFound);
+            throw new NotFoundException(ResponseCodes.UserNotFound);
         }
     }
 
@@ -71,7 +72,7 @@ public class LoginController : BaseController
         var newRefreshToken = await refreshTokenService.RotateRefreshTokenAsync(model.RefreshToken, userContext.UserId);
 
         if (newRefreshToken == null)
-            throw new UnauthorizedException(ErrorCodes.InvalidRefreshToken);
+            throw new UnauthorizedException(ResponseCodes.InvalidRefreshToken);
 
         var newAccessToken = tokenService.GenerateToken(userContext.UserId, userContext.Email, userContext.Role);
         var newCsrfToken = Guid.NewGuid().ToString("N");

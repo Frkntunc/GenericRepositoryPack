@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using Persistence.Contracts;
 using Serilog;
+using Shared.Constants;
 using Shared.Enums;
 using Shared.Exceptions;
 using Shared.Options;
@@ -91,7 +92,6 @@ builder.Services
     .AddControllers(o =>
     {
         o.Filters.Add<UnitOfWorkSaveChangesFilter>();
-        o.Filters.Add<ResultWrappingFilter>();
     })
     .PartManager.ApplicationParts.Add(new AssemblyPart(typeof(WebAPI.Controllers.UserController).Assembly));
 
@@ -99,7 +99,7 @@ builder.Services.Configure<ApiBehaviorOptions>(opt =>
 {
     opt.InvalidModelStateResponseFactory = context =>
     {
-        throw new ValidationException(ErrorCodes.ValidationError);
+        throw new ValidationException(ResponseCodes.ValidationError);
     };
 });
 

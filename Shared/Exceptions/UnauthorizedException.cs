@@ -4,7 +4,7 @@ namespace Shared.Exceptions
 {
     public class UnauthorizedException : BaseAppException
     {
-        public UnauthorizedException(ErrorCodes code)
+        public UnauthorizedException(string code)
             : base(code)
         {
         }

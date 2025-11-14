@@ -1,16 +1,18 @@
 ﻿using ApplicationService.Features.Queries.QueryRequests.User;
 using ApplicationService.Repositories;
 using MediatR;
+using Shared.Constants;
+using Shared.DTOs.Common;
+using Shared.DTOs.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Users.Application.DTO;
 
 namespace ApplicationService.Features.Queries.QueryHandlers.User
 {
-    public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDto>
+    public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, ServiceResponse<UserDto>>
     {
         private readonly IUserRepository userRepository;
 
@@ -19,7 +21,7 @@ namespace ApplicationService.Features.Queries.QueryHandlers.User
             this.userRepository = userRepository;
         }
 
-        public async Task<UserDto> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
+        public async Task<ServiceResponse<UserDto>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
             var user = await userRepository.GetByIdAsync(request.Id);
 
@@ -30,7 +32,7 @@ namespace ApplicationService.Features.Queries.QueryHandlers.User
                 Name = user.FirstName + " " + user.LastName
             };
 
-            return userDto;
+            return ServiceResponse<List<UserDto>>.CreateResponse(userDto, ResponseCodes.Success);
         }
     }
 }

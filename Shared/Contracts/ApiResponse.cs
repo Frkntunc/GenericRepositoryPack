@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Shared.Contracts
 {
-    public class ApiResponse<T>
+    public class ApiResponse
     {
         public bool Success { get; set; }
-        public T? Data { get; set; }
-        public string? Message { get; set; }
-        public int Code { get; set; }
         public int Status { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public string ResponseCode { get; set; }
+        public object? Data { get; set; }
     }
 
 }

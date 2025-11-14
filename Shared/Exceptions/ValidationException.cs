@@ -4,7 +4,7 @@ namespace Shared.Exceptions
 {
     public class ValidationException : BaseAppException
     {
-        public ValidationException(ErrorCodes code)
+        public ValidationException(string code)
             : base(code)
         {
         }

@@ -10,11 +10,11 @@ namespace Shared.Exceptions
 {
     public abstract class BaseAppException : Exception
     {
-        public ErrorCodes ErrorCode { get; }
+        public string ResponseCode { get; }
 
-        protected BaseAppException(ErrorCodes errorCode)
+        protected BaseAppException(string responseCode)
         {
-            ErrorCode = errorCode;
+            ResponseCode = responseCode;
         }
     }
 }

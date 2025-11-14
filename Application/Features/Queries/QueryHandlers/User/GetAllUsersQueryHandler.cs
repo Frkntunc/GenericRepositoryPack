@@ -2,16 +2,19 @@
 using ApplicationService.Repositories;
 using Domain.Entities;
 using MediatR;
+using Shared.Constants;
+using Shared.DTOs.Common;
+using Shared.DTOs.User;
+using Shared.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Users.Application.DTO;
 
 namespace ApplicationService.Features.Queries.QueryHandlers.User
 {
-    public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<UserDto>>
+    public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, ServiceResponse<List<UserDto>>>
     {
         private readonly IUserRepository userRepository;
 
@@ -20,11 +23,11 @@ namespace ApplicationService.Features.Queries.QueryHandlers.User
             this.userRepository = userRepository;
         }
 
-        public async Task<List<UserDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        public async Task<ServiceResponse<List<UserDto>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
             var users = await userRepository.GetAllAsync();
 
-            System.Threading.Thread.Sleep(20000);
+            throw new NotFoundException(ResponseCodes.UserNotFound);
 
             var userList = new List<UserDto>();
 
@@ -38,7 +41,7 @@ namespace ApplicationService.Features.Queries.QueryHandlers.User
                 });
             }
 
-            return userList;
+            return ServiceResponse<List<UserDto>>.CreateResponse(userList, ResponseCodes.Success);
         }
     }
 }

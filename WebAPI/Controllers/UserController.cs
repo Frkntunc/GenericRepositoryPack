@@ -3,6 +3,7 @@ using ApplicationService.Features.Queries.QueryRequests.User;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Middleware;
+using static MassTransit.ValidationResultExtensions;
 
 namespace WebAPI.Controllers;
 
@@ -21,14 +22,15 @@ public class UserController : BaseController
     public async Task<IActionResult> Get()
     {
         var users = await _mediator.Send(new GetAllUsersQuery());
-        return Ok(users);
+
+        return CheckResponse(users);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUser([FromBody] GetUserByIdQuery getUserByIdQuery)
     {
         var user = await _mediator.Send(getUserByIdQuery);
-        return Ok(user);
+        return CheckResponse(user);
     }
 
     [HttpPost]

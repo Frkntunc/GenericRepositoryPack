@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using Shared.Constants;
+using Shared.Contracts;
 using Shared.Enums;
 using Shared.Exceptions;
+using Shared.Helpers;
 using Shared.Resources;
 using System.Net;
 using System.Text.Json;
-using WebAPI.DTOs;
 
 namespace WebAPI.Middleware;
 
@@ -13,16 +15,13 @@ public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
-    private readonly IStringLocalizer<ErrorCodeResources> _localizer;
 
     public ExceptionHandlingMiddleware(
         RequestDelegate next,
-        ILogger<ExceptionHandlingMiddleware> logger,
-        IStringLocalizer<ErrorCodeResources> localizer)
+        ILogger<ExceptionHandlingMiddleware> logger)
     {
         _next = next;
         _logger = logger;
-        _localizer = localizer;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -39,31 +38,35 @@ public class ExceptionHandlingMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
-        var (statusCode, errorCode) = ex switch
-        {
-            NotFoundException nfEx => (StatusCodes.Status404NotFound, nfEx.ErrorCode),
-            ValidationException valEx => (StatusCodes.Status400BadRequest, valEx.ErrorCode),
-            _ => (StatusCodes.Status500InternalServerError, ErrorCodes.UnexpectedError)
-        };
+        var responseCode = ResponseCodes.UnexpectedError;
 
-        var message = _localizer[errorCode.ToString()];
-        var problem = new ProblemDetails
+        if (ex is BaseAppException bex)
         {
-            Title = message,
-            Detail = ex.Message,
-            Status = statusCode,
-            Type = $"https://httpstatuses.com/{statusCode}",
-            Extensions =
-            {
-                ["code"] = errorCode.ToString()
-            }
+            responseCode = bex.ResponseCode;
+        }
+
+        var httpStatus = ResponseCodeMapper.GetHttpStatus(responseCode);
+        var message = MessageResolver.GetResponseMessage(responseCode);
+
+        _logger.LogError(ex,
+            "GlobalException. ResponseCode: {ResponseCode}, Message: {Message}",
+            responseCode, ex.Message);
+
+        var apiResponse = new ApiResponse
+        {
+            Success = false,
+            Status = httpStatus,
+            Message = message,
+            ResponseCode = responseCode,
+            Data = null
         };
 
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = statusCode;
+        context.Response.StatusCode = httpStatus;
 
-        _logger.LogError(ex, "ErrorCode: {ErrorCode}, Message: {Message}", errorCode, message);
-
-        await context.Response.WriteAsJsonAsync(problem);
+        if (!context.Response.HasStarted)
+        {
+            await context.Response.WriteAsJsonAsync(apiResponse);
+        }
     }
 }

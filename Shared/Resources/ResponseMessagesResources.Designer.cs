@@ -22,14 +22,14 @@ namespace Shared.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class ErrorCodeResources {
+    public class ResponseMessagesResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal ErrorCodeResources() {
+        internal ResponseMessagesResources() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Shared.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Shared.Resources.ErrorCodeResources", typeof(ErrorCodeResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Shared.Resources.ResponseMessagesResources", typeof(ResponseMessagesResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,29 +61,38 @@ namespace Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The refresh token is invalid or expired..
+        ///   Looks up a localized string similar to Transaction Successful.
         /// </summary>
-        public static string InvalidRefreshToken {
+        public static string _0000 {
             get {
-                return ResourceManager.GetString("InvalidRefreshToken", resourceCulture);
+                return ResourceManager.GetString("0000", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to An unexpected error occurred..
         /// </summary>
-        public static string UnexpectedError {
+        public static string _1001 {
             get {
-                return ResourceManager.GetString("UnexpectedError", resourceCulture);
+                return ResourceManager.GetString("1001", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The refresh token is invalid or expired..
+        /// </summary>
+        public static string _2000 {
+            get {
+                return ResourceManager.GetString("2000", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to User not found..
         /// </summary>
-        public static string UserNotFound {
+        public static string _3000 {
             get {
-                return ResourceManager.GetString("UserNotFound", resourceCulture);
+                return ResourceManager.GetString("3000", resourceCulture);
             }
         }
     }

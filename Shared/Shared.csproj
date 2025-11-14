@@ -11,20 +11,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Update="Resources\ErrorCodeResources.Designer.cs">
+		<Compile Update="Resources\ResponseMessagesResources.Designer.cs">
 			<DesignTime>True</DesignTime>
 			<AutoGen>True</AutoGen>
-			<DependentUpon>ErrorCodeResources.resx</DependentUpon>
+			<DependentUpon>ResponseMessagesResources.resx</DependentUpon>
 		</Compile>
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Update="Resources\ErrorCodeResources.resx">
+		<EmbeddedResource Update="Resources\ResponseMessagesResources.resx">
 			<Generator>PublicResXFileCodeGenerator</Generator>
-			<LastGenOutput>ErrorCodeResources.Designer.cs</LastGenOutput>
+			<LastGenOutput>ResponseMessagesResources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
 
-		<EmbeddedResource Update="Resources\ErrorCodeResources.tr.resx">
+		<EmbeddedResource Update="Resources\ResponseMessagesResources.tr.resx">
 			<Generator>PublicResXFileCodeGenerator</Generator>
 			<LastGenOutput>ErrorCodeResources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>

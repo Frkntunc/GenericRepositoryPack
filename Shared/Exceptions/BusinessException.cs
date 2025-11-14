@@ -9,7 +9,7 @@ namespace Shared.Exceptions
 {
     public class BusinessException : BaseAppException
     {
-        public BusinessException(ErrorCodes code) : base(code)
+        public BusinessException(string code) : base(code)
         {
         }
     }
