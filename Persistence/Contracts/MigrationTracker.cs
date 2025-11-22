@@ -51,19 +51,42 @@ namespace Persistence.Contracts
                 {
                     stopwatch.Stop();
 
-                    _context.DbVersionHistory.Add(new DbVersionHistory
-                    {
-                        MigrationName = migration,
-                        AppliedOn = DateTime.Now,
-                        AppliedBy = "System",
-                        AppVersion = "1.0.0",
-                        MachineName = Environment.MachineName,
-                        Duration = stopwatch.Elapsed,
-                        Status = status,
-                        ErrorMessage = errorMessage
-                    });
+                    var connection = _context.Database.GetDbConnection();
+                    bool tableExists = false;
 
-                    await _context.SaveChangesAsync();
+                    if (connection.State != System.Data.ConnectionState.Open)
+                        connection.Open();
+
+                    var tables = connection.GetSchema("Tables");
+
+                    foreach (System.Data.DataRow row in tables.Rows)
+                    {
+                        if (row["TABLE_NAME"].ToString().Equals("DbVersionHistory", StringComparison.OrdinalIgnoreCase))
+                        {
+                            tableExists = true;
+                            break;
+                        }
+                    }
+
+                    if (connection.State == System.Data.ConnectionState.Open)
+                        connection.Close();
+
+                    if (tableExists)
+                    {
+                        _context.DbVersionHistory.Add(new DbVersionHistory
+                        {
+                            MigrationName = migration,
+                            AppliedOn = DateTime.Now,
+                            AppliedBy = "System",
+                            AppVersion = "1.0.0",
+                            MachineName = Environment.MachineName,
+                            Duration = stopwatch.Elapsed,
+                            Status = status,
+                            ErrorMessage = errorMessage
+                        });
+
+                        await _context.SaveChangesAsync();
+                    }
 
                     if (status == "Failed")
                         throw new InvalidOperationException($"Migration {migration} failed: {errorMessage}");
