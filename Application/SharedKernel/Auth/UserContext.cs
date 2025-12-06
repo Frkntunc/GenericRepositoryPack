@@ -14,16 +14,16 @@ namespace ApplicationService.SharedKernel
             _httpContextAccessor = accessor;
         }
 
-        public string UserId => _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
-                                ?? _httpContextAccessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
-                                ?? "";
+        public string UserId =>
+            _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? _httpContextAccessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+            ?? "0";
 
-        public string Email => _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Email)
-                                ?? _httpContextAccessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Email)
-                                ?? "";
+        public string Email =>
+            _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Email)
+            ?? _httpContextAccessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Email);
 
-        public string Role => _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Role)
-                                ?? "";
+        public string Role =>
+            _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Role);
     }
-
 }
