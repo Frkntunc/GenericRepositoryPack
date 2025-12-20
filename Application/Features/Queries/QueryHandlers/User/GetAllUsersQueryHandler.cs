@@ -27,8 +27,6 @@ namespace ApplicationService.Features.Queries.QueryHandlers.User
         {
             var users = await userRepository.GetAllAsync();
 
-            throw new NotFoundException(ResponseCodes.UserNotFound);
-
             var userList = new List<UserDto>();
 
             foreach (var item in users)

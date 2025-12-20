@@ -129,4 +129,7 @@
   <data name="3000" xml:space="preserve">
     <value>User not found.</value>
   </data>
+  <data name="1003" xml:space="preserve">
+    <value>Unauthorized error.</value>
+  </data>
 </root>

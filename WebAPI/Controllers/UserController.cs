@@ -2,6 +2,7 @@ using ApplicationService.Features.Commands.CommandRequests.Users;
 using ApplicationService.Features.Queries.QueryRequests.User;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.CustomAttribute;
 using WebAPI.Middleware;
 using static MassTransit.ValidationResultExtensions;
 
@@ -26,6 +27,7 @@ public class UserController : BaseController
         return CheckResponse(users);
     }
 
+    [HasPermission("getuser")]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUser([FromBody] GetUserByIdQuery getUserByIdQuery)
     {
@@ -33,6 +35,7 @@ public class UserController : BaseController
         return CheckResponse(user);
     }
 
+    [HasPermission("createuser")]
     [HttpPost]
     //[Idempotent(60)] // Create butonuna birkaç kez üst üste basýldýðýnda hepsi için yeni user oluþturmasýn tek bir user oluþtursun (Idempotency-Key) / 1dk cache 
     public async Task<IActionResult> Create([FromBody] CreateUserCommand command)

@@ -129,4 +129,7 @@
   <data name="3000" xml:space="preserve">
     <value>Kullanıcı bulunamadı.</value>
   </data>
+  <data name="1003" xml:space="preserve">
+    <value>Yetkisiz işlem.</value>
+  </data>
 </root>

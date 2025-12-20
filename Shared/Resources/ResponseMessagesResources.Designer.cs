@@ -79,6 +79,15 @@ namespace Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unauthorized error..
+        /// </summary>
+        public static string _1003 {
+            get {
+                return ResourceManager.GetString("1003", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The refresh token is invalid or expired..
         /// </summary>
         public static string _2000 {

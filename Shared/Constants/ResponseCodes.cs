@@ -11,6 +11,7 @@ namespace Shared.Constants
         public const string Success = "0000";
         public const string UnexpectedError = "1001";
         public const string ValidationError = "1002";
+        public const string UnauthorizedError = "1003";
         public const string UserNotFound = "3000";
         public const string InvalidRefreshToken = "2000";
     }

@@ -46,27 +46,53 @@ namespace ApplicationService.SharedKernel.Auth
             }
         }
 
-        public string GenerateToken(string userId, string email, string role)
+        public string GenerateToken(
+            string userId,
+            string phoneNumber,
+            string email,
+            IEnumerable<string> roles,
+            IEnumerable<string> permissions)
         {
-            var claims = new[]
-                    {
-                        new Claim(JwtRegisteredClaimNames.Sub, userId),
-                        new Claim(JwtRegisteredClaimNames.Email, email),
-                        new Claim(ClaimTypes.Role, role)
-                    };
+            var claims = new List<Claim>
+                            {
+                                new Claim(JwtRegisteredClaimNames.Sub, userId),
+                                new Claim(JwtRegisteredClaimNames.Email, email),
+                                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                                new Claim(JwtRegisteredClaimNames.Iat,
+                                    DateTimeOffset.Now.ToUnixTimeSeconds().ToString(),
+                                    ClaimValueTypes.Integer64),
+
+                                new Claim(ClaimTypes.MobilePhone, phoneNumber)
+                            };
+
+            foreach (var role in roles.Distinct())
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            foreach (var permission in permissions.Distinct())
+            {
+                claims.Add(new Claim("permission", permission));
+            }
+
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_options.SecretKey));
+
+            var credentials = new SigningCredentials(
+                key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
                 issuer: _options.Issuer,
                 audience: _options.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(30),
-                signingCredentials: new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey)),
-                    SecurityAlgorithms.HmacSha256)
+                notBefore: DateTime.Now,
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_options.AccessTokenExpirationMinutes)),
+                signingCredentials: credentials
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
 
     }
 

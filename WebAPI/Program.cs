@@ -2,23 +2,22 @@
 using ApplicationService.Extensions;
 using Domain.Extensions;
 using Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
-using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using Persistence.Contracts;
 using Serilog;
 using Shared.Constants;
-using Shared.Enums;
 using Shared.Exceptions;
 using Shared.Options;
 using StackExchange.Redis;
 using System.Globalization;
-using System.Threading.RateLimiting;
+using WebAPI.Auth;
 using WebAPI.Filters;
+using WebAPI.Helper;
 using WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -78,6 +77,11 @@ builder.Services.AddSwaggerGen(opt =>
     opt.AddSecurityDefinition("Bearer", jwtScheme);
     opt.AddSecurityRequirement(new OpenApiSecurityRequirement { { jwtScheme, Array.Empty<string>() } });
 });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 
 // Cookie ayarları
 builder.Services.Configure<CookiePolicyOptions>(opt =>

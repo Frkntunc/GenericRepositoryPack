@@ -17,7 +17,7 @@ namespace Shared.Helpers
         //{ ResponseCodes.NotFound, 404 },
         //{ ResponseCodes.Conflict, 409 },
 
-        //{ ResponseCodes.Unauthorized, 401 },
+        { ResponseCodes.UnauthorizedError, 401 },
         //{ ResponseCodes.Forbidden, 403 },
 
         //{ ResponseCodes.InternalError, 500 },

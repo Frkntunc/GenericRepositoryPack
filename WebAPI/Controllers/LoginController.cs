@@ -44,9 +44,11 @@ public class LoginController : BaseController
         {
             var userId = "1";
             var email = "furkan@example.com";
-            var role = "Admin";
+            var phoneNumber = "1234567890";
+            var role = new List<string> { "admin" };
+            var permission = new List<string> { "getuser", "createuser"};
 
-            var accessToken = tokenService.GenerateToken(userId, email, role);
+            var accessToken = tokenService.GenerateToken(userId, phoneNumber, email, role, permission);
             var refreshToken = await refreshTokenService.CreateRefreshTokenAsync(userId);
             var csrfToken = Guid.NewGuid().ToString("N");
 
@@ -74,7 +76,7 @@ public class LoginController : BaseController
         if (newRefreshToken == null)
             throw new UnauthorizedException(ResponseCodes.InvalidRefreshToken);
 
-        var newAccessToken = tokenService.GenerateToken(userContext.UserId, userContext.Email, userContext.Role);
+        var newAccessToken = "";// tokenService.GenerateToken(userContext.UserId, userContext.Email, userContext.Role);
         var newCsrfToken = Guid.NewGuid().ToString("N");
 
         CookieHelper.SetAuthCookies(Response, newAccessToken, newRefreshToken.Token, newCsrfToken);
