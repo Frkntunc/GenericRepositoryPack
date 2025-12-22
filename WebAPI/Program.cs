@@ -1,5 +1,4 @@
-﻿using AngleSharp;
-using ApplicationService.Extensions;
+﻿using ApplicationService.Extensions;
 using Domain.Extensions;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.OpenApi.Models;
 using Persistence.Contracts;
 using Serilog;
+using Serilog.Events;
 using Shared.Constants;
 using Shared.Exceptions;
 using Shared.Options;
@@ -25,14 +25,23 @@ var builder = WebApplication.CreateBuilder(args);
 // -------------------------------------------------
 // Logging (Serilog)
 // -------------------------------------------------
-builder.Host.UseSerilog((context, services, configuration) =>
-{
-    configuration
-        .MinimumLevel.Information()
-        .Enrich.FromLogContext()
-        .WriteTo.Console()
-        .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day);
-});
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.Logger(l => l
+        .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Information)
+        .WriteTo.File("Logs/Info/log-.txt", rollingInterval: RollingInterval.Day))
+    .WriteTo.Logger(l => l
+        .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Warning)
+        .WriteTo.File("Logs/Warning/log-.txt", rollingInterval: RollingInterval.Day))
+    .WriteTo.Logger(l => l
+        .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Error || e.Level == LogEventLevel.Fatal)
+        .WriteTo.File("Logs/Error/log-.txt", rollingInterval: RollingInterval.Day))
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // -------------------------------------------------
 // Services
@@ -115,7 +124,7 @@ var app = builder.Build();
 // -------------------------------------------------
 // Middleware pipeline
 // -------------------------------------------------
-
+app.UseSerilogRequestLogging();
 var supportedCultures = new[] { "en", "tr" };
 var localizationOptions = new RequestLocalizationOptions
 {

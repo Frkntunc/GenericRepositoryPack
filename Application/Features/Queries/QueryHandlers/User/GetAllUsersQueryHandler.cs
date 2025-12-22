@@ -2,6 +2,7 @@
 using ApplicationService.Repositories;
 using Domain.Entities;
 using MediatR;
+using Serilog;
 using Shared.Constants;
 using Shared.DTOs.Common;
 using Shared.DTOs.User;
@@ -25,6 +26,9 @@ namespace ApplicationService.Features.Queries.QueryHandlers.User
 
         public async Task<ServiceResponse<List<UserDto>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
+            Log.Information("Information log2");
+            Log.Debug("Debug log2");
+            Log.Error("Error log2");
             var users = await userRepository.GetAllAsync();
 
             var userList = new List<UserDto>();
