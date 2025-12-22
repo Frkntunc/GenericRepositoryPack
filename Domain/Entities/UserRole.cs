@@ -9,7 +9,7 @@ using Domain.Entities;
 
 namespace Domain.Entities
 {
-    public class UserRole : Entity<UserRole,long>
+    public class UserRole : Entity<UserRole, long>, IAuditableEntity
     {
         public long UserId { get; internal set; }
         public User User { get; internal set; }

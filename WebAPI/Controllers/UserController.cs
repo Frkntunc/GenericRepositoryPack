@@ -42,7 +42,7 @@ public class UserController : BaseController
         return CheckResponse(user);
     }
 
-    [HasPermission("createuser")]
+    //[HasPermission("createuser")]
     [HttpPost]
     //[Idempotent(60)] // Create butonuna birkaç kez üst üste basýldýðýnda hepsi için yeni user oluþturmasýn tek bir user oluþtursun (Idempotency-Key) / 1dk cache 
     public async Task<IActionResult> Create([FromBody] CreateUserCommand command)

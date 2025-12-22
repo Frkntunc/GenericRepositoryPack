@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class PermissionGroup : Entity<PermissionGroup, int>
+    public class PermissionGroup : Entity<PermissionGroup, int>, IAuditableEntity
     {
         public string Name { get; internal set; }
 

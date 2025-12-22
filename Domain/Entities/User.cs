@@ -4,7 +4,7 @@ using Shared.Enums;
 
 namespace Domain.Entities;
 
-public class User : Entity<User, long>
+public class User : Entity<User, long> , IAuditableEntity
 {
     public string Email { get; internal set; }
     public string FirstName { get; internal set; }

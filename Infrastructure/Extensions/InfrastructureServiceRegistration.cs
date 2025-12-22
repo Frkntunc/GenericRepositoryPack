@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Persistence.Contracts;
+using Persistence.Interceptors;
 using Shared.Options;
 using System;
 using System.Collections.Generic;

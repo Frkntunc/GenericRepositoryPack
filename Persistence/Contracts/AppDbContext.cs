@@ -21,6 +21,7 @@ namespace Persistence.Contracts
         public DbSet<RolePermission> RolePermission => Set<RolePermission>();
         public DbSet<PermissionGroup> PermissionGroup => Set<PermissionGroup>();
         public DbSet<DbVersionHistory> DbVersionHistory => Set<DbVersionHistory>();
+        public DbSet<AuditLog> AuditLog => Set<AuditLog>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

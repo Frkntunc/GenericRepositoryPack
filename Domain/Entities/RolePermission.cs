@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class RolePermission : Entity<RolePermission, long>
+    public class RolePermission : Entity<RolePermission, long> , IAuditableEntity
     {
         public long RoleId { get; internal set; }
         public long PermissionId { get; internal set; }

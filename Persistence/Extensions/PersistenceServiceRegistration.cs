@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Persistence.Contracts;
 using Microsoft.Extensions.Options;
 using Shared.Options;
+using Persistence.Interceptors;
 
 namespace Infrastructure.Extensions
 {
@@ -16,10 +17,14 @@ namespace Infrastructure.Extensions
             this IServiceCollection services,
             IConfiguration configuration)
         {
+            services.AddScoped<AuditInterceptor>();
+
             services.AddDbContext<AppDbContext>((sp, options) =>
             {
+                var interceptor = sp.GetRequiredService<AuditInterceptor>();
+
                 var connOptions = sp.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
-                options.UseSqlServer(connOptions.SqlServerConnectionString);
+                options.UseSqlServer(connOptions.SqlServerConnectionString).AddInterceptors(interceptor);
             });
 
             services.AddScoped<MigrationTracker>(sp =>
