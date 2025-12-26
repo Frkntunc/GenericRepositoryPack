@@ -39,7 +39,7 @@ namespace ApplicationService.Features.Queries.QueryHandlers.User
                 });
             }
 
-            return ServiceResponse<List<UserDto>>.CreateResponse(userList, ResponseCodes.Success);
+            return ServiceResponse<List<UserDto>>.Success(userList, ResponseCodes.Success);
         }
     }
 }

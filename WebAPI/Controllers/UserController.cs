@@ -34,7 +34,7 @@ public class UserController : BaseController
         return CheckResponse(users);
     }
 
-    [HasPermission("getuser")]
+    //[HasPermission("getuser")]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUser([FromBody] GetUserByIdQuery getUserByIdQuery)
     {

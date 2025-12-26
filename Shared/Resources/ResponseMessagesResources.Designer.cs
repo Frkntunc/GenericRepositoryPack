@@ -61,7 +61,7 @@ namespace Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Transaction Successful.
+        ///   Looks up a localized string similar to Transaction successful..
         /// </summary>
         public static string _0000 {
             get {
@@ -75,6 +75,15 @@ namespace Shared.Resources {
         public static string _1001 {
             get {
                 return ResourceManager.GetString("1001", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Validation error..
+        /// </summary>
+        public static string _1002 {
+            get {
+                return ResourceManager.GetString("1002", resourceCulture);
             }
         }
         

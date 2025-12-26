@@ -5,13 +5,15 @@ using ApplicationService.Repositories;
 using Domain.Factories;
 using MassTransit;
 using MediatR;
+using Shared.Constants;
+using Shared.DTOs.Common;
 using Shared.Enums;
 using Shared.Events;
 using Shared.Static;
 
 namespace ApplicationService.Features.Commands.CommandHandlers.Users
 {
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand,Unit>
+    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, ServiceResponse>
     {
         private readonly IUserRepository userRepository;
         private readonly IPublishEndpoint _publishEndpoint;
@@ -22,7 +24,7 @@ namespace ApplicationService.Features.Commands.CommandHandlers.Users
             _publishEndpoint = publishEndpoint;
         }
 
-        public async Task<Unit> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        public async Task<ServiceResponse> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
             var user = UserFactory.Create(
                 request.Email,
@@ -34,7 +36,7 @@ namespace ApplicationService.Features.Commands.CommandHandlers.Users
             await userRepository.AddAsync(user);
             await _publishEndpoint.Publish(new CacheInvalidatedEvent(CacheKeys.GetAllUsers), cancellationToken);
 
-            return Unit.Value;
+            return ServiceResponse.Success(ResponseCodes.Success);
         }
     }
 }

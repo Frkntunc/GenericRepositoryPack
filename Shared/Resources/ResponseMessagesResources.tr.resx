@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="0000" xml:space="preserve">
-    <value>İşlem Başarılı</value>
+    <value>İşlem başarılı.</value>
   </data>
   <data name="2000" xml:space="preserve">
     <value>Refresh token geçersiz veya süresi dolmuş.</value>
@@ -131,5 +131,8 @@
   </data>
   <data name="1003" xml:space="preserve">
     <value>Yetkisiz işlem.</value>
+  </data>
+  <data name="1002" xml:space="preserve">
+    <value>Doğrulama hatası.</value>
   </data>
 </root>

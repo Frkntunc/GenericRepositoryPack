@@ -25,6 +25,11 @@ namespace ApplicationService.Features.Queries.QueryHandlers.User
         {
             var user = await userRepository.GetByIdAsync(request.Id);
 
+            if (user == null)
+            {
+                return ServiceResponse<UserDto>.Fail(ResponseCodes.UserNotFound, "User not found");
+            }
+
             var userDto = new UserDto
             {
                 Id = user.Id,
@@ -32,7 +37,7 @@ namespace ApplicationService.Features.Queries.QueryHandlers.User
                 Name = user.FirstName + " " + user.LastName
             };
 
-            return ServiceResponse<List<UserDto>>.CreateResponse(userDto, ResponseCodes.Success);
+            return ServiceResponse<UserDto>.Success(userDto, ResponseCodes.Success.ToString());
         }
     }
 }

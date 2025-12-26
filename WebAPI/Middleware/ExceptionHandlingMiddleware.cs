@@ -57,8 +57,7 @@ public class ExceptionHandlingMiddleware
             Success = false,
             Status = httpStatus,
             Message = message,
-            ResponseCode = responseCode,
-            Data = null
+            ResponseCode = responseCode
         };
 
         context.Response.ContentType = "application/json";
