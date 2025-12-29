@@ -23,7 +23,6 @@ namespace ApplicationService.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services,
         IConfiguration configuration)
         {
-            services.AddAutoMapper(typeof(AssemblyReference).Assembly);
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddMediatR(Assembly.GetExecutingAssembly());
             services.AddScoped<IUserContext, UserContext>();

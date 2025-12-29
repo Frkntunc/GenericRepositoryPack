@@ -23,12 +23,9 @@ public class UserController : BaseController
     }
 
     [HttpGet]
+    [HasPermission("getusers")]
     public async Task<IActionResult> Get()
     {
-        _logger.LogInformation("Information log");
-        _logger.LogError("Error log");
-        Log.Information("Informationasdsad log");
-        Log.Error("Errorasdasdas log");
         var users = await _mediator.Send(new GetAllUsersQuery());
 
         return CheckResponse(users);

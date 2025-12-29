@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using Persistence.Contracts;
 using Serilog;
@@ -66,25 +67,37 @@ builder.Services.AddDomainServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddPersistenceServices(builder.Configuration);
 
-// Swagger + JWT
+// Swagger + JWT (.NET 10 Classic Style)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opt =>
 {
     opt.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 
-    var jwtScheme = new OpenApiSecurityScheme
+    // JWT Tanımlaması
+    opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
         Scheme = "bearer",
         BearerFormat = "JWT",
-        Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Description = "JWT Bearer token kullanın. Örn: Bearer {token}",
-        Reference = new OpenApiReference { Id = "Bearer", Type = ReferenceType.SecurityScheme }
-    };
+        Description = "JWT Bearer token kullanın. Örn: Bearer {token}"
+    });
 
-    opt.AddSecurityDefinition("Bearer", jwtScheme);
-    opt.AddSecurityRequirement(new OpenApiSecurityRequirement { { jwtScheme, Array.Empty<string>() } });
+    opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 builder.Services.AddAuthorization();

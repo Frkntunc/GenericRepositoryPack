@@ -16,7 +16,6 @@ namespace WebAPI.Auth
                 throw new UnauthorizedException(ResponseCodes.UnauthorizedError);
             }
 
-            // JWT üretirken claim adını "permission" olarak vermiştiniz.
             // Burada kullanıcının claimlerinde bu izin var mı diye bakıyoruz.
             var hasPermission = context.User.Claims.Any(c =>
                 c.Type == "permission" &&
