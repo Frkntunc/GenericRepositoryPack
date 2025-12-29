@@ -23,7 +23,7 @@ public class UserController : BaseController
     }
 
     [HttpGet]
-    [HasPermission("getusers")]
+    //[HasPermission("getusers")]
     public async Task<IActionResult> Get()
     {
         var users = await _mediator.Send(new GetAllUsersQuery());
