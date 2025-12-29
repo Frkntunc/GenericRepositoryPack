@@ -25,7 +25,7 @@ namespace ApplicationService.Extensions
         {
             services.AddAutoMapper(typeof(AssemblyReference).Assembly);
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+            services.AddMediatR(Assembly.GetExecutingAssembly());
             services.AddScoped<IUserContext, UserContext>();
             services.AddSingleton<JwtTokenService>();
             services.AddScoped<RefreshTokenService>();
