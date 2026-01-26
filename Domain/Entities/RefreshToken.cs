@@ -1,19 +1,31 @@
 ﻿using Domain.Entities.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
     public class RefreshToken : Entity<RefreshToken, Guid>
     {
-        public string Token { get; internal set; } = null!;
-        public string UserId { get; internal set; } = null!;
-        public DateTime ExpiryDate { get; internal set; }
-        public bool IsRevoked { get; internal set; } = false;
-        public bool IsExpired => DateTime.UtcNow >= ExpiryDate;
-    }
+        private RefreshToken(string userId)
+        {
+            Token = Guid.NewGuid().ToString("N");
+            UserId = userId;
+            ExpiryDate = DateTime.UtcNow.AddDays(7);
+            IsRevoked = false;
+        }
 
+        public string Token { get; private set; } = null!;
+        public string UserId { get; private set; } = null!;
+        public DateTime ExpiryDate { get; private set; }
+        public bool IsRevoked { get; private set; } = false;
+        public bool IsExpired => DateTime.UtcNow >= ExpiryDate;
+
+        public static RefreshToken Create(string userId)
+        {
+            return new RefreshToken(userId);
+        }
+
+        public void ChangeRevokeStatus(bool status)
+        {
+            IsRevoked = status;
+        }
+    }
 }

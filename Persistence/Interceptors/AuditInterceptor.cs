@@ -34,13 +34,13 @@ namespace Persistence.Interceptors
                 if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
                     continue;
 
-                var auditEntry = new AuditLog
-                {
-                    TableName = entry.Entity.GetType().Name,
-                    UserId = _currentUserService.UserId ?? "System", // Kullanıcı yoksa System
-                    DateTime = DateTime.UtcNow,
-                    Type = entry.State.ToString()
-                };
+                var auditEntry = AuditLog.Create
+                (
+                    entry.Entity.GetType().Name,
+                    _currentUserService.UserId ?? "System", // Kullanıcı yoksa System
+                    DateTime.UtcNow,
+                    entry.State.ToString()
+                );
 
                 var oldValues = new Dictionary<string, object>();
                 var newValues = new Dictionary<string, object>();
@@ -72,9 +72,9 @@ namespace Persistence.Interceptors
                     }
                 }
 
-                auditEntry.OldValues = oldValues.Count == 0 ? null : JsonSerializer.Serialize(oldValues);
-                auditEntry.NewValues = newValues.Count == 0 ? null : JsonSerializer.Serialize(newValues);
-                auditEntry.AffectedColumns = affectedColumns.Count == 0 ? null : JsonSerializer.Serialize(affectedColumns);
+                auditEntry.SetOldValues(oldValues.Count == 0 ? null : JsonSerializer.Serialize(oldValues));
+                auditEntry.SetNewValues(newValues.Count == 0 ? null : JsonSerializer.Serialize(newValues));
+                auditEntry.SetAffectedColumns(affectedColumns.Count == 0 ? null : JsonSerializer.Serialize(affectedColumns));
 
                 // Primary Key yakalama (Insert işlemlerinde Id SaveChanges'dan sonra oluşur, 
                 // tam profesyonel çözüm için 2 aşamalı kayıt gerekir ama basitlik adına burada geçiyoruz)

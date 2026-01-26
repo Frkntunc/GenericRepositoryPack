@@ -10,11 +10,11 @@ namespace Domain.Entities
 {
     public class Role : Entity<Role,long>, IAuditableEntity
     {
-        public string Name { get; internal set; }
-        public string? Description { get; internal set; }
-        public StatusType Status { get; internal set; }
+        public string Name { get; private set; }
+        public string? Description { get; private set; }
+        public StatusType Status { get; private set; }
 
-        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
-        public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
+        public ICollection<UserRole> UserRoles { get; private set; } = new List<UserRole>();
+        public ICollection<RolePermission> RolePermissions { get; private set; } = new List<RolePermission>();
     }
 }

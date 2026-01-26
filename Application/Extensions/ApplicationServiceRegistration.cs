@@ -13,7 +13,6 @@ using Microsoft.Extensions.Options;
 using Shared.Options;
 using StackExchange.Redis;
 using System.Reflection;
-using System.Reflection.Metadata;
 
 namespace ApplicationService.Extensions
 {
@@ -47,6 +46,7 @@ namespace ApplicationService.Extensions
             services.AddScoped<IDeadLetterService, DeadLetterService>();
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RetryAndDeadLetterBehavior<,>));
 
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             return services;
         }
     }

@@ -16,8 +16,7 @@ namespace UnitTest.Mocks
         {
             var userList = new List<User>()
             {
-                new User() {Id=1, Email="deneme@deneme.com", FirstName="Deneme", LastName="Deneme", IsBlocked=false, Status=StatusType.Available},
-                new User() {Id=2, Email="test@test.com", FirstName="Test", LastName="Test", IsBlocked=true, Status=StatusType.NotAvailable}
+                User.Create("deneme@deneme.com", "Deneme", "Deneme", "passwordhash")
             };
 
             var mockRepo = new Mock<IUserRepository>();
@@ -38,11 +37,9 @@ namespace UnitTest.Mocks
                 if (org == null)
                     throw new InvalidOperationException();
 
-                org.Email = user.Email;
-                org.FirstName = user.FirstName;
-                org.LastName = user.LastName;
-                org.IsBlocked = user.IsBlocked;
-                org.Status = user.Status;
+                org.SetEmail(user.Email);
+                org.SetFirstName(user.FirstName);
+                org.SetLastName(user.LastName);
             });
 
             return mockRepo;

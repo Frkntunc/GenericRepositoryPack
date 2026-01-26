@@ -11,9 +11,9 @@ namespace Domain.Entities
 {
     public class UserRole : Entity<UserRole, long>, IAuditableEntity
     {
-        public long UserId { get; internal set; }
-        public User User { get; internal set; }
-        public long RoleId { get; internal set; }
-        public Role Role { get; internal set; }
+        public long UserId { get; private set; }
+        public User User { get; private set; }
+        public long RoleId { get; private set; }
+        public Role Role { get; private set; }
     }
 }

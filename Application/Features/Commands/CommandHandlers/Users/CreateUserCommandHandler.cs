@@ -2,7 +2,7 @@
 using ApplicationService.Features.Common.Application.Common.Behaviors;
 using ApplicationService.Features.Queries.QueryRequests.User;
 using ApplicationService.Repositories;
-using Domain.Factories;
+using Domain.Entities;
 using MassTransit;
 using MediatR;
 using Shared.Constants;
@@ -26,7 +26,7 @@ namespace ApplicationService.Features.Commands.CommandHandlers.Users
 
         public async Task<ServiceResponse> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            var user = UserFactory.Create(
+            var user = User.Create(
                 request.Email,
                 request.FirstName,
                 request.LastName,

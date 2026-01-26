@@ -73,17 +73,17 @@ namespace Persistence.Contracts
 
                     if (tableExists)
                     {
-                        _context.DbVersionHistory.Add(new DbVersionHistory
-                        {
-                            MigrationName = migration,
-                            AppliedOn = DateTime.Now,
-                            AppliedBy = "System",
-                            AppVersion = "1.0.0",
-                            MachineName = Environment.MachineName,
-                            Duration = stopwatch.Elapsed,
-                            Status = status,
-                            ErrorMessage = errorMessage
-                        });
+                        _context.DbVersionHistory.Add(DbVersionHistory.Create(
+                        
+                            migration,
+                            DateTime.Now,
+                            "System",
+                            "1.0.0",
+                            Environment.MachineName,
+                            stopwatch.Elapsed,
+                            status,
+                            errorMessage
+                        ));
 
                         await _context.SaveChangesAsync();
                     }

@@ -1,11 +1,4 @@
-﻿using Domain.Services.Abstract;
-using Domain.Services.Concrete;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace Domain.Extensions
 {
@@ -13,9 +6,6 @@ namespace Domain.Extensions
     {
         public static IServiceCollection AddDomainServices(this IServiceCollection services)
         {
-            services.AddScoped<IRefreshTokenDomainService, RefreshTokenDomainService>();
-            services.AddScoped<IUserDomainService, UserDomainService>();
-
             return services;
         }
     }

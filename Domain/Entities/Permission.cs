@@ -10,11 +10,11 @@ namespace Domain.Entities
 {
     public class Permission : Entity<Permission, long>, IAuditableEntity
     {
-        public string Name { get; internal set; }
-        public string? Description { get; internal set; }
-        public int PermissionGroupId { get; internal set; }
+        public string Name { get; private set; }
+        public string? Description { get; private set; }
+        public int PermissionGroupId { get; private set; }
 
-        public PermissionGroup PermissionGroup { get; set; }
-        public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
+        public PermissionGroup PermissionGroup { get; private set; }
+        public ICollection<RolePermission> RolePermissions { get; private set; } = new List<RolePermission>();
     }
 }

@@ -1,31 +1,20 @@
 ﻿using ApplicationService.Repositories;
 using Domain.Entities;
-using Domain.Entities.Common;
-using Domain.Factories;
-using Domain.Services.Abstract;
-using Domain.Services.Concrete;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ApplicationService.Services
 {
     public class RefreshTokenService
     {
         private readonly IRefreshTokenRepository refreshTokenRepository;
-        private readonly IRefreshTokenDomainService refreshTokenDomainService;
 
-        public RefreshTokenService(IRefreshTokenRepository refreshTokenRepository, IRefreshTokenDomainService refreshTokenDomainService)
+        public RefreshTokenService(IRefreshTokenRepository refreshTokenRepository)
         {
             this.refreshTokenRepository = refreshTokenRepository;
-            this.refreshTokenDomainService = refreshTokenDomainService;
         }
 
         public async Task<RefreshToken> CreateRefreshTokenAsync(string userId)
         {
-            var refreshToken = RefreshTokenFactory.Create(userId);
+            var refreshToken = RefreshToken.Create(userId);
 
             await refreshTokenRepository.Add(refreshToken);
             return refreshToken;
@@ -42,7 +31,7 @@ namespace ApplicationService.Services
 
             if (refreshToken != null)
             {
-                refreshTokenDomainService.ChangeRevokeStatus(refreshToken, true);
+                refreshToken.ChangeRevokeStatus(true);
 
                 await refreshTokenRepository.UpdateAsync(refreshToken);
             }
@@ -55,9 +44,9 @@ namespace ApplicationService.Services
             if (entity is null)
                 return null;
 
-            refreshTokenDomainService.ChangeRevokeStatus(entity, true);
+            entity.ChangeRevokeStatus(true);
 
-            var newToken = RefreshTokenFactory.Create(userId);
+            var newToken = RefreshToken.Create(userId);
 
             await refreshTokenRepository.Add(newToken);
 

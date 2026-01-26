@@ -9,10 +9,10 @@ namespace Domain.Entities
 {
     public class RolePermission : Entity<RolePermission, long> , IAuditableEntity
     {
-        public long RoleId { get; internal set; }
-        public long PermissionId { get; internal set; }
+        public long RoleId { get; private set; }
+        public long PermissionId { get; private set; }
 
-        public Role Role { get; set; } = default!;
-        public Permission Permission { get; set; } = default!;
+        public Role Role { get; private set; } = default!;
+        public Permission Permission { get; private set; } = default!;
     }
 }

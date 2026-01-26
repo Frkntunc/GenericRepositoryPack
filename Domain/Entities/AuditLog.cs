@@ -9,14 +9,42 @@ namespace Domain.Entities
 {
     public class AuditLog
     {
-        public long Id { get; set; }
-        public string UserId { get; set; }
-        public string Type { get; set; }
-        public string TableName { get; set; }
-        public DateTime DateTime { get; set; }
-        public string OldValues { get; set; } = null;
-        public string NewValues { get; set; }
-        public string AffectedColumns { get; set; } = null;
-        public string PrimaryKey { get; set; } = null;
+        private AuditLog(string tableName, string userId, DateTime dateTime, string type)
+        {
+            TableName = tableName;
+            UserId = userId;
+            DateTime = dateTime;
+            Type = type;
+        }
+
+        public long Id { get; private set; }
+        public string UserId { get; private set; }
+        public string Type { get; private set; }
+        public string TableName { get; private set; }
+        public DateTime DateTime { get; private set; }
+        public string OldValues { get; private set; } = null;
+        public string NewValues { get; private set; }
+        public string AffectedColumns { get; private set; } = null;
+        public string PrimaryKey { get; private set; } = null;
+
+        public static AuditLog Create(string tableName, string userId, DateTime dateTime, string type)
+        {
+            return new AuditLog(tableName, userId, dateTime, type);
+        }
+
+        public void SetOldValues(string oldValues)
+        {
+            OldValues = oldValues;
+        }
+
+        public void SetNewValues(string newValues)
+        {
+            NewValues = newValues;
+        }
+
+        public void SetAffectedColumns(string columns) 
+        {
+            AffectedColumns = columns;
+        }
     }
 }
