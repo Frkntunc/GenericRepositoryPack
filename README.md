@@ -29,6 +29,9 @@ Modern yazılım dünyasında "tekerleği her seferinde yeniden icat etmemek" kr
   - İlerleyen zamanlarda mikroservis mimarisine evrilebilir.  
   - Yeni özellikler kolayca entegre edilebilir.  
   - Alternatif veri kaynakları (SQL, NoSQL) ile hibrit çözümler uygulanabilir 
+- Tam Observability (Gözlemlenebilirlik): OpenTelemetry standartlarında Logs, Traces ve Metrics takibi.
+- Merkezi İzleme: otel-collector desteği ile verilerin merkezi olarak işlenmesi ve istenilen backend'e (Jaeger, Prometheus, Grafana vb.) aktarılması.
+
 
 ---
 
@@ -50,6 +53,12 @@ Proje, karmaşıklığı yönetmek ve sürdürülebilirliği artırmak için mod
 - Caching & Queue: Performans için merkezi önbellekleme ve asenkron süreç yönetimi için mesaj kuyruğu entegrasyonu.
 - Gözlemlenebilirlik (Logging): Uygulama içi tüm olayların izlenebilirliğini sağlayan yapılandırılmış log altyapısı.
 - Localization: Çok dilli uygulama desteği için esnek yerelleştirme sistemi.
+
+**Modern Gözlemlenebilirlik (Observability)**
+- OpenTelemetry & OTel Collector: Uygulama, vendor-agnostic (satıcı bağımsız) bir izleme altyapısına sahiptir. OpenTelemetry SDK'ları kullanılarak üretilen tüm telemetri verileri (Logs, Traces, Metrics), doğrudan bir OTel Collector katmanına aktarılır.
+- Dağıtık İzleme (Distributed Tracing): İsteklerin (Request) servisler arasındaki yolculuğu uçtan uca izlenebilir; darboğazlar ve hata noktaları noktasal olarak tespit edilebilir.
+- Metrikler ve Performans: Sistem kaynak kullanımı ve uygulama özelindeki (business metrics) veriler gerçek zamanlı olarak takip edilebilir.
+- Structured Logging: Uygulama içi olaylar, sadece metin olarak değil, analiz edilebilir ve sorgulanabilir "yapılandırılmış veri" formatında işlenir.
 
 ---
 
