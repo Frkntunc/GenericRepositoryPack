@@ -49,8 +49,7 @@ public class ExceptionHandlingMiddleware
         var message = MessageResolver.GetResponseMessage(responseCode);
 
         _logger.LogError(ex,
-            "GlobalException. ResponseCode: {ResponseCode}, Message: {Message}",
-            responseCode, ex.Message);
+            $"GlobalException. ResponseCode: {responseCode}, Message: {ex.Message}, LocalizedMessage: {message}");
 
         var apiResponse = new ApiResponse
         {

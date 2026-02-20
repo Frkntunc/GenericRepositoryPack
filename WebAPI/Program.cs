@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
-using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using Persistence.Contracts;
 using Serilog;
@@ -20,17 +19,35 @@ using WebAPI.Auth;
 using WebAPI.Filters;
 using WebAPI.Helper;
 using WebAPI.Middleware;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using Serilog.Sinks.OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // -------------------------------------------------
 // Logging (Serilog)
 // -------------------------------------------------
+var serviceName = (builder.Configuration["OTEL_SERVICE_NAME"] ?? "generic-repository-pack").ToLower();
+var otelEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] ?? "http://localhost:4317";
+
+// Serilog Yapılandırması
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.Console()
+    .WriteTo.OpenTelemetry(options =>
+    {
+        options.Endpoint = otelEndpoint;
+        options.Protocol = OtlpProtocol.Grpc;
+        options.ResourceAttributes = new Dictionary<string, object>
+        {
+            ["service.name"] = serviceName
+        };
+    })
     .WriteTo.Logger(l => l
         .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Information)
         .WriteTo.File("Logs/Info/log-.txt", rollingInterval: RollingInterval.Day))
@@ -43,6 +60,30 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Host.UseSerilog();
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService(serviceName))
+    .WithTracing(tracing =>
+    {
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddEntityFrameworkCoreInstrumentation(options =>
+            {
+                options.SetDbStatementForText = builder.Environment.IsDevelopment() ? true : false;
+            })// DB takibi
+            .AddRedisInstrumentation()
+            .AddOtlpExporter() // Veriyi 4317 portundaki Collector'a basar
+            .SetSampler(new TraceIdRatioBasedSampler(1.0)); // Sistem prodda oturmaya başladığında zamanla düşür. 0.8 => 0.5 => 0.1
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddRuntimeInstrumentation() // CPU/RAM gibi sistem metrikleri
+            .AddOtlpExporter();
+    });
 
 // -------------------------------------------------
 // Services
