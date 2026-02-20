@@ -1,0 +1,167 @@
+services:
+  # --- ORTAK ALTYAPI (INFRASTRUCTURE) ---
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: generic_repository_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: GucluBirSifre123!
+      POSTGRES_DB: generic_repository
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - generic_repository-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - generic_repository-network
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - generic_repository-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: generic_repository_user
+      RABBITMQ_DEFAULT_PASS: generic_repository_Pass_123!
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - generic_repository-network
+
+  # --- OBSERVABILITY STACK ---
+
+  # 1. OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./observability/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+      - "8888:8888" # Metrics endpoint
+    depends_on:
+      - elasticsearch
+    networks:
+      - generic_repository-network
+
+  # 2. Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # RAM kullanımını sınırladık, yoksa PC çöker.
+    ports:
+      - "9200:9200"
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+    networks:
+      - generic_repository-network
+
+  # 3. Kibana (Log Görselleştirme)
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.10
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - generic_repository-network
+
+  # 4. Prometheus (Metrik Toplayıcı)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./observability/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - otel-collector
+    networks:
+      - generic_repository-network
+
+  # 5. Grafana (Metrik Dashboard)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - generic_repository-network
+
+  # --- SERVICES ---
+
+  my_api:
+    container_name: generic_repository_app
+    restart: always
+    build:
+      context: ./generic_repository 
+      dockerfile: Src/WebAPI/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+      - otel-collector
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__PostgreConnectionString=Host=db;Database=generic_repository;Username=admin;Password=GucluBirSifre123!
+      - Queue__RabbitMqHost=rabbitmq
+      - Queue__RabbitMqUsername=generic_repository_user 
+      - Queue__RabbitMqPassword=generic_repository_Pass_123!
+      - Cache__RedisConfiguration=redis:6379
+      - Cache__RedisInstanceName=generic_repository_
+      # OTel Config
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_SERVICE_NAME=generic_repository-main-api
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=generic_repository-Main-API
+    networks:
+      - generic_repository-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  elastic_data:
+
+networks:
+  generic_repository-network:
+    driver: bridge

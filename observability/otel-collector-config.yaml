@@ -1,0 +1,42 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+  
+  elasticsearch:
+    endpoints: ["http://elasticsearch:9200"]
+    logs_index: "generic_repository-logs"
+    traces_index: "generic_repository-traces"
+    mapping:
+      mode: none # ECS formatını kapatır, ES 7.x hata vermez
+    tls:
+      insecure: true # Localde SSL hatasıyla uğraşmamak için
+
+  debug:
+    verbosity: detailed
+    
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch, debug]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus, debug]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch, debug]
