@@ -7,28 +7,30 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Persistence.Contracts;
 using Serilog;
 using Serilog.Events;
+using Serilog.Sinks.OpenTelemetry;
 using Shared.Constants;
 using Shared.Exceptions;
 using Shared.Options;
 using StackExchange.Redis;
 using System.Globalization;
+using System.Threading.RateLimiting;
 using WebAPI.Auth;
 using WebAPI.Filters;
 using WebAPI.Helper;
 using WebAPI.Middleware;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using Serilog.Sinks.OpenTelemetry;
+using RedisRateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // -------------------------------------------------
-// Logging (Serilog)
+// Logging
 // -------------------------------------------------
 var serviceName = (builder.Configuration["OTEL_SERVICE_NAME"] ?? "generic-repository-pack").ToLower();
 var otelEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] ?? "http://localhost:4317";
@@ -91,8 +93,65 @@ builder.Services.AddOpenTelemetry()
 builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
 builder.Services.AddLocalization();
 
-var redisConn = builder.Configuration.GetSection("Cache")["RedisConfiguration"];
-builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConn));
+var redisConnString = builder.Configuration.GetSection("Cache")["RedisConfiguration"];
+var redisOptions = ConfigurationOptions.Parse(redisConnString);
+redisOptions.AbortOnConnectFail = false;
+
+var redisConnection = ConnectionMultiplexer.Connect(redisOptions);
+builder.Services.AddSingleton<IConnectionMultiplexer>(redisConnection);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsJsonAsync(new { hata = "Too many requests. Try again later." }, cancellationToken: token);
+    };
+
+    // GLOBAL LIMIT
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        if (!redisConnection.IsConnected) return RateLimitPartition.GetNoLimiter("Global");
+
+        return RedisRateLimitPartition.GetConcurrencyRateLimiter("GlobalLimit", _ => new RedisConcurrencyRateLimiterOptions
+        {
+            ConnectionMultiplexerFactory = () => redisConnection,
+            PermitLimit = 1000
+        });
+    });
+
+    // USER POLICY
+    options.AddPolicy("UserPolicy", context =>
+    {
+        var clientId = context.User.Identity?.IsAuthenticated == true
+            ? context.User.FindFirst("UserId")?.Value
+            : context.Connection.RemoteIpAddress?.ToString() ?? "anon";
+
+        if (!redisConnection.IsConnected) return RateLimitPartition.GetNoLimiter(clientId);
+
+        return RedisRateLimitPartition.GetSlidingWindowRateLimiter(clientId, _ => new RedisSlidingWindowRateLimiterOptions
+        {
+            ConnectionMultiplexerFactory = () => redisConnection,
+            PermitLimit = 50,
+            Window = TimeSpan.FromMinutes(1)
+        });
+    });
+
+    // STRICT LOGIN POLICY
+    options.AddPolicy("StrictLoginPolicy", context =>
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown-ip";
+
+        if (!redisConnection.IsConnected) return RateLimitPartition.GetNoLimiter(ip);
+
+        return RedisRateLimitPartition.GetFixedWindowRateLimiter($"login_{ip}", _ => new RedisFixedWindowRateLimiterOptions
+        {
+            ConnectionMultiplexerFactory = () => redisConnection,
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(1)
+        });
+    });
+});
 
 // Config binding
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
@@ -100,7 +159,6 @@ builder.Services.Configure<CsrfOptions>(builder.Configuration.GetSection("Csrf")
 builder.Services.Configure<CacheOptions>(builder.Configuration.GetSection("Cache"));
 builder.Services.Configure<ConnectionStringsOptions>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<QueueOptions>(builder.Configuration.GetSection("Queue"));
-builder.Services.Configure<RateLimitingOptions>(builder.Configuration.GetSection("RateLimiting"));
 
 // Katman bağımlılıkları
 builder.Services.AddApplicationServices(builder.Configuration);
@@ -179,6 +237,8 @@ var app = builder.Build();
 // Middleware pipeline
 // -------------------------------------------------
 app.UseSerilogRequestLogging();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 var supportedCultures = new[] { "en", "tr" };
 var localizationOptions = new RequestLocalizationOptions
 {
@@ -189,8 +249,18 @@ var localizationOptions = new RequestLocalizationOptions
 
 // Accept-Language header’ını dikkate al
 localizationOptions.RequestCultureProviders.Insert(0, new AcceptLanguageHeaderRequestCultureProvider());
+app.UseForwardedHeaders(); // Proxy arkasında çalışıyorsa gerçek IP'yi alabilmek için
 
+app.UseRouting();
 app.UseRequestLocalization(localizationOptions);
+app.UseCookiePolicy();
+app.UseMiddleware<JwtCookieMiddleware>();
+app.UseMiddleware<AuthMiddleware>();
+app.UseRateLimiter();
+app.UseAuthorization();
+app.UseMiddleware<IdempotencyMiddleware>();
+app.UseXssProtection(options => { options.SanitizeRequests = true; });
+app.UseMiddleware<CsrfMiddleware>();
 
 // Database migration
 using (var scope = app.Services.CreateScope())
@@ -198,21 +268,6 @@ using (var scope = app.Services.CreateScope())
     var tracker = scope.ServiceProvider.GetRequiredService<MigrationTracker>();
     await tracker.ApplyMigrationsAsync();
 }
-
-// Exception & Security Middlewares
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseForwardedHeaders(); // Proxy arkasında çalışıyorsa gerçek IP'yi alabilmek için
-app.UseMiddleware<RateLimitingMiddleware>();
-app.UseMiddleware<JwtCookieMiddleware>();
-app.UseMiddleware<AuthMiddleware>();
-app.UseAuthorization();
-app.UseCookiePolicy();
-app.UseMiddleware<IdempotencyMiddleware>();
-app.UseXssProtection(options =>
-{
-    options.SanitizeRequests = true;
-});
-app.UseMiddleware<CsrfMiddleware>();
 
 // Gereksiz headerları kaldır
 app.Use(async (ctx, next) =>
@@ -235,6 +290,6 @@ if (app.Environment.IsDevelopment())
 
 // Default redirect
 app.MapGet("/", () => Results.Redirect("/swagger"));
-app.MapControllers().RequireRateLimiting("RedisUserPolicy");
+app.MapControllers().RequireRateLimiting("UserPolicy");
 
 app.Run();
