@@ -1,33 +1,38 @@
 ﻿using ApplicationService.SharedKernel.Auth;
+using Microsoft.Extensions.Options;
+using Shared.Constants;
+using Shared.Contracts;
+using Shared.Helpers;
+using Shared.Options;
 
-namespace WebAPI.Middleware
+namespace Workify.WebAPI.Middleware
 {
     public class AuthMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly JwtTokenService _tokenService;
+        private readonly string[] _anonymousPaths;
 
-        public AuthMiddleware(RequestDelegate next, JwtTokenService tokenService)
+        public AuthMiddleware(RequestDelegate next, JwtTokenService tokenService, IOptions<AuthMiddlewareOptions> options)
         {
             _next = next;
             _tokenService = tokenService;
+            _anonymousPaths = options.Value.AnonymousPaths;
         }
-
-        private static readonly string[] _anonymousPaths = new[]
-        {
-                "/swagger",
-                "/swagger/index.html",
-                "/swagger/v1/swagger.json",
-                "/api/login",
-                "/api/register",
-                "/"
-        };
 
         public async Task InvokeAsync(HttpContext context)
         {
             var path = context.Request.Path.Value?.ToLowerInvariant() ?? "";
 
-            if (_anonymousPaths.Any(p => path.StartsWith(p)))
+            // Allow exact root path and predefined anonymous paths only
+            if (path == "/" || _anonymousPaths.Any(p => path.StartsWith(p)))
+            {
+                await _next(context);
+                return;
+            }
+
+            // JwtCookieMiddleware tarafindan zaten dogrulanmis istekleri gec
+            if (context.User?.Identity?.IsAuthenticated == true)
             {
                 await _next(context);
                 return;
@@ -44,20 +49,31 @@ namespace WebAPI.Middleware
                 }
                 else
                 {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    await context.Response.WriteAsync("Geçersiz token.");
+                    await WriteErrorResponse(context, StatusCodes.Status401Unauthorized, ResponseCodes.InvalidToken);
                     return;
                 }
             }
             else
             {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                await context.Response.WriteAsync("Token eksik.");
+                await WriteErrorResponse(context, StatusCodes.Status401Unauthorized, ResponseCodes.MissingToken);
                 return;
             }
 
             await _next(context);
         }
-    }
 
+        private static async Task WriteErrorResponse(HttpContext context, int statusCode, string responseCode)
+        {
+            var apiResponse = new ApiResponse
+            {
+                Success = false,
+                Status = statusCode,
+                Message = MessageResolver.GetResponseMessage(responseCode),
+                ResponseCode = responseCode
+            };
+            context.Response.StatusCode = statusCode;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(apiResponse);
+        }
+    }
 }

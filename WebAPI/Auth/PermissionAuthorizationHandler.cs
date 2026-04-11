@@ -1,35 +1,46 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using ApplicationService.Services.Common;
+using Microsoft.AspNetCore.Authorization;
 using Shared.Constants;
 using Shared.Exceptions;
+using Shared.Static;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace WebAPI.Auth
 {
     public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
     {
-        protected override Task HandleRequirementAsync(
+        private readonly ICacheService _cache;
+        public PermissionAuthorizationHandler(ICacheService cache)
+        {
+            _cache = cache;
+        }
+        protected async override Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             PermissionRequirement requirement)
         {
-            // Kullanıcı giriş yapmamışsa reddet
             if (context.User == null || !context.User.Identity.IsAuthenticated)
             {
                 throw new UnauthorizedException(ResponseCodes.UnauthorizedError);
             }
 
-            // Burada kullanıcının claimlerinde bu izin var mı diye bakıyoruz.
-            var hasPermission = context.User.Claims.Any(c =>
-                c.Type == "permission" &&
-                c.Value == requirement.Permission);
+            var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? context.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
 
-            if (!hasPermission)
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new UnauthorizedException(ResponseCodes.UnauthorizedError);
+            }
+
+            string cacheKey = CacheKeys.Permission + userId;
+            var permissions = await _cache.GetAsync<List<string>>(cacheKey);
+
+            if (permissions == null || !permissions.Contains(requirement.Permission))
             {
                 throw new UnauthorizedException(ResponseCodes.UnauthorizedError);
             }
 
             context.Succeed(requirement);
-
-            return Task.CompletedTask;
         }
     }
-
 }

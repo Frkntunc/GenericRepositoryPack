@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApplicationService.Repositories
+namespace ApplicationService.Services.Common
 {
     public interface IDeadLetterService
     {
-        Task SendAsync<TRequest>(TRequest request, Exception exception);
+        Task SendAsync<TRequest>(TRequest request, Exception exception, CancellationToken cancellationToken = default);
     }
 }

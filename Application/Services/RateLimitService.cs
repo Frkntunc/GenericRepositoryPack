@@ -1,4 +1,4 @@
-﻿using ApplicationService.Repositories;
+﻿using ApplicationService.Services.Common;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;

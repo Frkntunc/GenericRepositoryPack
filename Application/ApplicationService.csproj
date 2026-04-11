@@ -5,8 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="DTO\**" />
     <Compile Remove="SharedKernel\Extensions\**" />
+    <EmbeddedResource Remove="DTO\**" />
     <EmbeddedResource Remove="SharedKernel\Extensions\**" />
+    <None Remove="DTO\**" />
     <None Remove="SharedKernel\Extensions\**" />
   </ItemGroup>
   <ItemGroup>
@@ -25,8 +28,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DTO\" />
   </ItemGroup>
 </Project>

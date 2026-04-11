@@ -1,4 +1,4 @@
-﻿using ApplicationService.Repositories;
+﻿using ApplicationService.Services.Common;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace ApplicationService.Services
 {
-    public class DeadLetterService : IDeadLetterService
+    public class DeadLetterService : IDeadLetterService, IScopedService
     {
         private readonly ILogger<DeadLetterService> _logger;
 
@@ -25,11 +25,14 @@ namespace ApplicationService.Services
             _logger = logger;
         }
 
-        public async Task SendAsync<TRequest>(TRequest request, Exception exception)
+        public Task SendAsync<TRequest>(TRequest request, Exception exception, CancellationToken cancellationToken = default)
         {
             //TODO : Burada bir kuyruğa yollama ve background service ile işleme yapılabilir. Şimdilik loglama yapılıyor.
-            _logger.LogInformation($"The request could not be processed. Request : {typeof(TRequest).Name}, Ex : {exception}");
+            _logger.LogError(exception,
+                "Request sent to dead letter queue. RequestType={RequestType}",
+                typeof(TRequest).Name);
 
+            return Task.CompletedTask;
         }
     }
 }

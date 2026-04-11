@@ -1,4 +1,4 @@
-﻿using ApplicationService.Repositories;
+﻿using ApplicationService.Features.Common;
 using MediatR;
 using Shared.DTOs.Common;
 using Shared.DTOs.User;

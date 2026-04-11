@@ -23,7 +23,7 @@ namespace Infrastructure.Repositories.Common
             _currentUserService = currentUserService;
         }
 
-        public async Task<int> SaveChangesAsync()
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             ApplyAuditing();
 

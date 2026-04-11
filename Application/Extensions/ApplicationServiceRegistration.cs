@@ -1,7 +1,7 @@
 ﻿using ApplicationService.Features.Common;
 using ApplicationService.Features.Common.Application.Common.Behaviors;
-using ApplicationService.Repositories;
 using ApplicationService.Services;
+using ApplicationService.Services.Common;
 using ApplicationService.SharedKernel;
 using ApplicationService.SharedKernel.Auth;
 using ApplicationService.SharedKernel.Auth.Common;

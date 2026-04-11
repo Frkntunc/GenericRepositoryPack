@@ -1,4 +1,4 @@
-﻿using ApplicationService.Repositories;
+﻿using ApplicationService.Services.Common;
 using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿using ApplicationService.Repositories;
+﻿using ApplicationService.Services.Common;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Polly;

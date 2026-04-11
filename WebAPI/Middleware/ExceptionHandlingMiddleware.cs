@@ -1,13 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
-using Shared.Constants;
+﻿using Shared.Constants;
 using Shared.Contracts;
-using Shared.Enums;
 using Shared.Exceptions;
 using Shared.Helpers;
-using Shared.Resources;
-using System.Net;
-using System.Text.Json;
 
 namespace WebAPI.Middleware;
 

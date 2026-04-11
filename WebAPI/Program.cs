@@ -1,5 +1,4 @@
 ﻿using ApplicationService.Extensions;
-using Domain.Extensions;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.CookiePolicy;
@@ -12,6 +11,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Persistence.Contracts;
+using RedisRateLimiting;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.OpenTelemetry;
@@ -22,10 +22,11 @@ using StackExchange.Redis;
 using System.Globalization;
 using System.Threading.RateLimiting;
 using WebAPI.Auth;
+using WebAPI.Extensions;
 using WebAPI.Filters;
 using WebAPI.Helper;
 using WebAPI.Middleware;
-using RedisRateLimiting;
+using Workify.WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -162,7 +163,6 @@ builder.Services.Configure<QueueOptions>(builder.Configuration.GetSection("Queue
 
 // Katman bağımlılıkları
 builder.Services.AddApplicationServices(builder.Configuration);
-builder.Services.AddDomainServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddPersistenceServices(builder.Configuration);
 
