@@ -10,6 +10,7 @@ namespace ApplicationService.Repositories
 {
     public interface IUserRepository : IRepositoryBase<User>
     {
-        Task<User?> GetByEmailAsync(string email);
+        Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken);
+        Task<User?> GetByIdWithRolesAsync(long id, CancellationToken cancellationToken = default);
     }
 }

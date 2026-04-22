@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Contracts;
 using Shared.DTOs.Common;
 using Shared.Helpers;
-using System.ComponentModel.DataAnnotations;
 
 namespace WebAPI.Controllers;
 

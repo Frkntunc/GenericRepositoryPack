@@ -26,6 +26,8 @@ public class User : Entity<User, long>, IAuditableEntity
     public DateTime? LastPasswordChangeDate { get; private set; }
     public int LoginTryCount { get; private set; }
     public bool IsBlocked { get; private set; }
+    public string? LastLoginIp { get; private set; } // Son giri� IP'si
+    public DateTime? LastLoginDate { get; private set; } // Son giri� tarihi
 
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
@@ -63,5 +65,11 @@ public class User : Entity<User, long>, IAuditableEntity
     {
         PasswordHash = passwordHash;
         LastPasswordChangeDate = DateTime.UtcNow;
+    }
+
+    public void RecordLogin(string ipAddress)
+    {
+        LastLoginIp = ipAddress;
+        LastLoginDate = DateTime.UtcNow;
     }
 }

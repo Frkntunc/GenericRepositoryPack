@@ -20,50 +20,53 @@ namespace Infrastructure.Repositories.Common
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
-        public async Task AddAsync(T entity)
+        public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
         {
-            var result = _dbContext.Set<T>().Add(entity);
+            var result = await _dbContext.Set<T>().AddAsync(entity, cancellationToken);
+            return result.Entity;
         }
 
-        public virtual async Task AddRangeAsync(IEnumerable<T> entities)
+        public virtual async Task AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
         {
-            await _dbContext.Set<T>().AddRangeAsync(entities);
+            await _dbContext.Set<T>().AddRangeAsync(entities, cancellationToken);
         }
 
-        public async Task<IReadOnlyList<T>> GetAllAsync()
+        public async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Set<T>().AsNoTracking().ToListAsync();
+            return await _dbContext.Set<T>().AsNoTracking().ToListAsync(cancellationToken);
         }
 
-        public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
+        public async Task<T> GetAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Set<T>().SingleOrDefaultAsync(predicate);
+            return await _dbContext.Set<T>().SingleOrDefaultAsync(predicate, cancellationToken);
         }
 
-        public async Task<T> GetByIdAsync(long id)
+        public async Task<T> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Set<T>().FindAsync(id);
+            var keyProperty = _dbContext.Model.FindEntityType(typeof(T))!.FindPrimaryKey()!.Properties[0];
+            var convertedId = Convert.ChangeType(id, keyProperty.ClrType);
+            return await _dbContext.Set<T>().FindAsync(new object[] { convertedId }, cancellationToken);
         }
 
-        public async Task RemoveAsync(T entity)
+        public void Remove(T entity)
         {
             _dbContext.Set<T>().Remove(entity);
         }
 
-        public async Task RemoveRangeAsync(IEnumerable<T> entities)
+        public void RemoveRange(IEnumerable<T> entities)
         {
             _dbContext.Set<T>().RemoveRange(entities);
         }
 
-        public async Task UpdateAsync(T entity)
+        public void Update(T entity)
         {
             _dbContext.Entry(entity).State = EntityState.Modified;
-
         }
 
-        public async Task UpdateRangeAsync(IEnumerable<T> entities)
+        public void UpdateRange(IEnumerable<T> entities)
         {
-            _dbContext.Entry(entities).State = EntityState.Modified;
+            foreach (var entity in entities)
+                _dbContext.Entry(entity).State = EntityState.Modified;
         }
     }
 }

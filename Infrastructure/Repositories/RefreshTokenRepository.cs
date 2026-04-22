@@ -19,39 +19,40 @@ namespace Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task Add(RefreshToken refreshToken)
+        public Task Add(RefreshToken refreshToken, CancellationToken cancellationToken = default)
         {
             _dbContext.RefreshToken.Add(refreshToken);
+            return Task.CompletedTask;
         }
 
-        public async Task<RefreshToken> GetRefreshTokenAsync(string oldToken, string userId)
+        public async Task<RefreshToken> GetRefreshTokenAsync(string oldToken, string userId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.RefreshToken.FirstOrDefaultAsync(x =>
                 x.Token == oldToken &&
                 x.UserId == userId &&
                 !x.IsRevoked &&
-                x.ExpiryDate > DateTime.UtcNow);
+                x.ExpiryDate > DateTime.UtcNow, cancellationToken);
         }
 
-        public async Task<List<RefreshToken>> GetRefreshTokensByUserIdAsync(string userId)
+        public async Task<List<RefreshToken>> GetRefreshTokensByUserIdAsync(string userId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.RefreshToken
                 .Where(rt => rt.UserId == userId && !rt.IsRevoked && !rt.IsExpired)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
-        public async Task<RefreshToken> GetRefreshTokenAsync(string token)
+        public async Task<RefreshToken> GetRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.RefreshToken.FirstOrDefaultAsync(x => x.Token == token);
+            return await _dbContext.RefreshToken.FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
         }
 
-        public async Task<bool> ValidateRefreshTokenAsync(string token, string userId)
+        public async Task<bool> ValidateRefreshTokenAsync(string token, string userId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.RefreshToken.AnyAsync(x =>
                 x.Token == token &&
                 x.UserId == userId &&
                 !x.IsRevoked &&
-                x.ExpiryDate > DateTime.UtcNow);
+                x.ExpiryDate > DateTime.UtcNow, cancellationToken);
         }
     }
 }

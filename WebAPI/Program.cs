@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -160,6 +161,12 @@ builder.Services.Configure<CsrfOptions>(builder.Configuration.GetSection("Csrf")
 builder.Services.Configure<CacheOptions>(builder.Configuration.GetSection("Cache"));
 builder.Services.Configure<ConnectionStringsOptions>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<QueueOptions>(builder.Configuration.GetSection("Queue"));
+builder.Services.Configure<CookieTokenOptions>(builder.Configuration.GetSection("CookieToken"));
+builder.Services.Configure<FileLoggingOptions>(builder.Configuration.GetSection("FileLogging"));
+builder.Services.Configure<AuthMiddlewareOptions>(builder.Configuration.GetSection("AuthMiddleware"));
+builder.Services.Configure<SecurityHeaderOptions>(builder.Configuration.GetSection("SecurityHeader"));
+builder.Services.Configure<AppLocalizationOptions>(builder.Configuration.GetSection("Localization"));
+builder.Services.Configure<WebClientOptions>(builder.Configuration.GetSection("WebClient"));
 
 // Katman bağımlılıkları
 builder.Services.AddApplicationServices(builder.Configuration);

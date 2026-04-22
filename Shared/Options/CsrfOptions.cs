@@ -12,6 +12,7 @@ namespace Shared.Options
         public string HeaderName { get; set; } = "X-CSRF-TOKEN";
         public List<string> MethodsToCheck { get; set; } = new List<string>();
         public List<string> ExemptPaths { get; set; } = new List<string>();
+        public string SecretKey { get; set; } = string.Empty;
     }
 
 }

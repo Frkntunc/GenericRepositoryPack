@@ -7,6 +7,11 @@
         public const string ValidationError = "1002";
         public const string UnauthorizedError = "1003";
         public const string UserNotFound = "3000";
+        public const string EnterValidEmail = "3011";
+        public const string EmailCannotBeEmpty = "3012";
+        public const string PasswordRequired = "3013";
+        public const string IpAddressRequired = "3014";
+        public const string EmailOrPasswordWrong = "3020";
         public const string InvalidRefreshToken = "2000";
         public const string InvalidToken = "4001";
         public const string MissingToken = "4002";

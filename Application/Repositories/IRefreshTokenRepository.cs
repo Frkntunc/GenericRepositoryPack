@@ -10,10 +10,10 @@ namespace ApplicationService.Repositories
 {
     public interface IRefreshTokenRepository : IRepositoryBase<RefreshToken>
     {
-        Task Add(RefreshToken refreshToken);
-        Task<bool> ValidateRefreshTokenAsync(string token, string userId);
-        Task<RefreshToken> GetRefreshTokenAsync(string token);
-        Task<RefreshToken> GetRefreshTokenAsync(string oldToken, string userId);
-        Task<List<RefreshToken>> GetRefreshTokensByUserIdAsync(string userId);
+        Task Add(RefreshToken refreshToken, CancellationToken cancellationToken = default);
+        Task<bool> ValidateRefreshTokenAsync(string token, string userId, CancellationToken cancellationToken = default);
+        Task<RefreshToken> GetRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
+        Task<RefreshToken> GetRefreshTokenAsync(string oldToken, string userId, CancellationToken cancellationToken = default);
+        Task<List<RefreshToken>> GetRefreshTokensByUserIdAsync(string userId, CancellationToken cancellationToken = default);
     }
 }
