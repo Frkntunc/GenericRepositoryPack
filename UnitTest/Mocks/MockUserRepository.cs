@@ -30,7 +30,7 @@ namespace UnitTest.Mocks
                 userList.Add(user);
             });
 
-            mockRepo.Setup(x => x.UpdateAsync(It.IsAny<User>())).Callback((User user) =>
+            mockRepo.Setup(x => x.Update(It.IsAny<User>())).Callback((User user) =>
             {
                 var org = userList.Where(a => a.Id == user.Id).Single();
 

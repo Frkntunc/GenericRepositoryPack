@@ -1,15 +1,10 @@
 ﻿using ApplicationService.Services.Common;
 using Microsoft.Extensions.Caching.Distributed;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace ApplicationService.Services
 {
-    public class CacheService : ICacheService
+    public class CacheService : ICacheService, ITransientService
     {
         private readonly IDistributedCache _cache;
 

@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ApplicationService.Services.Common;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.Extensions.Options;
-using Shared.Options;
+using System.Text;
 
 namespace ApplicationService.SharedKernel.Auth
 {
-    public class JwtTokenService
+    public class JwtTokenService : ISingletonService
     {
         private readonly JwtOptions _options;
 
@@ -81,8 +78,6 @@ namespace ApplicationService.SharedKernel.Auth
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
-
     }
 
 }

@@ -1,22 +1,11 @@
-﻿using ApplicationService.Repositories;
-using ApplicationService.Repositories.Common;
+﻿using ApplicationService.Repositories.Common;
 using Infrastructure.Consumers;
-using Infrastructure.Repositories;
 using Infrastructure.Repositories.Common;
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Persistence.Contracts;
-using Persistence.Interceptors;
 using Shared.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Users.Infrastructure.Repositories;
 
 namespace Infrastructure.Extensions
 {
@@ -26,9 +15,10 @@ namespace Infrastructure.Extensions
         IConfiguration configuration)
         {
             services.AddTransient(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
-            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddRepositoriesByConvention();
+
+
 
             services.AddMassTransit(x =>
             {
@@ -36,8 +26,7 @@ namespace Infrastructure.Extensions
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    var serviceProvider = services.BuildServiceProvider();
-                    var queueOptions = serviceProvider.GetRequiredService<IOptions<QueueOptions>>().Value;
+                    var queueOptions = context.GetRequiredService<IOptions<QueueOptions>>().Value;
 
                     cfg.Host(queueOptions.RabbitMqHost, h =>
                     {
@@ -47,12 +36,41 @@ namespace Infrastructure.Extensions
 
                     cfg.ReceiveEndpoint("cache-invalidation-queue", e =>
                     {
+                        e.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(1)));
+                        e.UseInMemoryOutbox(context);
                         e.ConfigureConsumer<CacheInvalidatedConsumer>(context);
                     });
                 });
             });
 
             return services;
+        }
+
+        private static void AddRepositoriesByConvention(this IServiceCollection services)
+        {
+            var repositoryBaseType = typeof(IRepositoryBase<>);
+            var infrastructureAssembly = typeof(RepositoryBase<>).Assembly;
+            var applicationAssembly = repositoryBaseType.Assembly;
+
+            var repositoryInterfaces = applicationAssembly.GetExportedTypes()
+                .Where(t => t.IsInterface
+                    && t != repositoryBaseType
+                    && t.GetInterfaces().Any(i =>
+                        i.IsGenericType && i.GetGenericTypeDefinition() == repositoryBaseType));
+
+            var concreteTypes = infrastructureAssembly.GetExportedTypes()
+                .Where(t => t.IsClass && !t.IsAbstract);
+
+            foreach (var interfaceType in repositoryInterfaces)
+            {
+                var implementationType = concreteTypes
+                    .FirstOrDefault(t => interfaceType.IsAssignableFrom(t));
+
+                if (implementationType != null)
+                {
+                    services.AddScoped(interfaceType, implementationType);
+                }
+            }
         }
     }
 }

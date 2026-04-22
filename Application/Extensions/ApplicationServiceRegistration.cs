@@ -1,17 +1,11 @@
 ﻿using ApplicationService.Features.Common;
 using ApplicationService.Features.Common.Application.Common.Behaviors;
-using ApplicationService.Services;
 using ApplicationService.Services.Common;
-using ApplicationService.SharedKernel;
-using ApplicationService.SharedKernel.Auth;
 using ApplicationService.SharedKernel.Auth.Common;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Shared.Options;
-using StackExchange.Redis;
 using System.Reflection;
 
 namespace ApplicationService.Extensions
@@ -20,34 +14,72 @@ namespace ApplicationService.Extensions
     {
         //Application'da kullanmak istediğimiz servisleri implemente ediyoruz
         public static IServiceCollection AddApplicationServices(this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration, params Assembly[] additionalMediatRAssemblies)
         {
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-            services.AddMediatR(Assembly.GetExecutingAssembly());
-            services.AddScoped<IUserContext, UserContext>();
-            services.AddSingleton<JwtTokenService>();
-            services.AddScoped<RefreshTokenService>();
-            services.AddScoped<IPasswordHasherService, PasswordHasherService>();
+
+            var assemblies = new[] { Assembly.GetExecutingAssembly() }
+                .Concat(additionalMediatRAssemblies)
+                .ToArray();
+            services.AddMediatR(assemblies);
+
+            services.AddServicesByConvention();
+            services.AddScoped<IUserContextSetter>(sp => (IUserContextSetter)sp.GetRequiredService<IUserContext>());
 
             services.AddStackExchangeRedisCache(options =>
             {
-                var serviceProvider = services.BuildServiceProvider();
-                var redisOptions = serviceProvider.GetRequiredService<IOptions<CacheOptions>>().Value;
-                options.Configuration = redisOptions.RedisConfiguration;
-                options.InstanceName = redisOptions.RedisInstanceName;
+                options.Configuration = configuration["Cache:RedisConfiguration"];
+                options.InstanceName = configuration["Cache:RedisInstanceName"];
             });
 
-            services.AddSingleton<IRateLimitService, RateLimitService>();
-            services.AddSingleton<IConcurrencyService, ConcurrencyService>();
-
-            services.AddScoped<ICacheService, CacheService>();
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
-
-            services.AddScoped<IDeadLetterService, DeadLetterService>();
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RetryAndDeadLetterBehavior<,>));
-
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
             return services;
+        }
+
+        private static void AddServicesByConvention(this IServiceCollection services)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var concreteTypes = assembly.GetExportedTypes()
+                .Where(t => t.IsClass && !t.IsAbstract);
+
+            foreach (var implementationType in concreteTypes)
+            {
+                var serviceInterfaces = implementationType.GetInterfaces()
+                    .Where(i => i != typeof(IScopedService)
+                        && i != typeof(ISingletonService)
+                        && i != typeof(ITransientService));
+
+                if (typeof(IScopedService).IsAssignableFrom(implementationType))
+                {
+                    RegisterService(services, implementationType, serviceInterfaces, ServiceLifetime.Scoped);
+                }
+                else if (typeof(ISingletonService).IsAssignableFrom(implementationType))
+                {
+                    RegisterService(services, implementationType, serviceInterfaces, ServiceLifetime.Singleton);
+                }
+                else if (typeof(ITransientService).IsAssignableFrom(implementationType))
+                {
+                    RegisterService(services, implementationType, serviceInterfaces, ServiceLifetime.Transient);
+                }
+            }
+        }
+
+        private static void RegisterService(IServiceCollection services, Type implementationType,
+            IEnumerable<Type> serviceInterfaces, ServiceLifetime lifetime)
+        {
+            var primaryInterface = serviceInterfaces.FirstOrDefault();
+
+            if (primaryInterface != null)
+            {
+                services.Add(new ServiceDescriptor(primaryInterface, implementationType, lifetime));
+            }
+            else
+            {
+                services.Add(new ServiceDescriptor(implementationType, implementationType, lifetime));
+            }
         }
     }
 }

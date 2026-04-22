@@ -39,5 +39,4 @@ namespace Infrastructure.Extensions
             return services;
         }
     }
-
 }
